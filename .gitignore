@@ -6,3 +6,4 @@
 env
 pinhole.egg-info
 .ropeproject
+docs/_build
