@@ -15,7 +15,7 @@ setup(
     keywords="web api photo manager",
     packages=find_packages(),
     install_requires=["flask", "flask-restful", "flask-sqlalchemy",
-                      "boto", "Sphinx"],
+                      "boto", "Sphinx", "sphinxcontrib-httpdomain"],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",
