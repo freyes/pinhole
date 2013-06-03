@@ -13,5 +13,8 @@ Dependencies
 ------------
 
 * flask
-* flask-restful
 * flask-sqlalchemy
+* flask-restful
+* flask-login
+* Sphinx
+* sphinxcontrib-httpdomain
