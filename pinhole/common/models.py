@@ -4,7 +4,19 @@ from flask.ext.sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-class User(db.Model):
+class BaseModel(object):
+    @classmethod
+    def get_by(cls, **kwargs):
+        rows = cls.query.filter_by(**kwargs)
+        if rows.count() == 1:
+            return rows.first()
+        elif rows.count() == 0:
+            return None
+        else:
+            raise ValueError("More than 1 rows matched")
+
+
+class User(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(120), unique=True)
@@ -20,8 +32,14 @@ class User(db.Model):
     def is_active(self):
         return self.active
 
+    def get_id(self):
+        return self.id
 
-class Tag(db.Model):
+    def is_authenticated(self):
+        return True
+
+
+class Tag(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(80), unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
@@ -37,7 +55,7 @@ tags = db.Table('tag_photo',
                 )
 
 
-class Photo(db.Model):
+class Photo(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(120))
     timestamp = db.Column(db.DateTime)
@@ -77,6 +95,6 @@ class Photo(db.Model):
         db.session.commit()
 
 
-class Roll(db.Model):
+class Roll(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     timestamp = db.Column(db.DateTime)

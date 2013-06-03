@@ -8,8 +8,10 @@ class TestPhotoController(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
         self.user = models.User("john", "john@example.com")
+        self.user.password = "doe"
         db.session.add(self.user)
         db.session.commit()
+
         self.photo = models.Photo()
         self.photo.user = self.user
         self.photo.title = "Landscape"
@@ -18,7 +20,13 @@ class TestPhotoController(BaseTest):
         self.photo.rating = 5.0
         db.session.add(self.photo)
         db.session.commit()
+        self.photo_id = self.photo.id
 
     def test_get(self):
-        s = self.app.get("/api/v1/photos/%d" % self.photo.id)
-        import ipdb; ipdb.set_trace()
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/photos/%d" % self.photo_id)
+
+        assert "id" in res.json
+        assert "title" in res.json
+        assert res.json["id"] == self.photo_id
+        assert res.json["title"] == "Landscape"
