@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from nose.tools import assert_equal
 from pinhole.common import models
 from pinhole.common.app import db
 from .base import BaseTest
@@ -10,6 +11,11 @@ class TestPhotoController(BaseTest):
         self.user = models.User("john", "john@example.com")
         self.user.set_password("doe")
         db.session.add(self.user)
+        db.session.commit()
+
+        self.user2 = models.User("john2", "john2@example.com")
+        self.user2.set_password("doe")
+        db.session.add(self.user2)
         db.session.commit()
 
         self.photo = models.Photo()
@@ -30,3 +36,10 @@ class TestPhotoController(BaseTest):
         assert "title" in res.json
         assert res.json["id"] == self.photo_id
         assert res.json["title"] == "Landscape"
+
+    def test_get_someone_else_photo(self):
+        self.login("john2", "doe")
+        res = self.app.get("/api/v1/photos/%d" % self.photo_id,
+                           expect_errors=True)
+
+        assert_equal(res.status_int, 404)
