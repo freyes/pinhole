@@ -1,15 +1,23 @@
 from flask.ext import restful
-from flask.ext.restful import abort, fields, marshal_with
+from flask.ext.restful import abort, fields, marshal_with, reqparse
 from flask.ext.login import login_required, current_user
 from pinhole.common import models
-from pinhole.common.app import api
+from pinhole.common.app import api, db
 
 
 # TODO: put all the public fields here
 photo_fields = {
     'id': fields.Integer,
     'title': fields.String,
+    'description': fields.String,
+    'rating': fields.Raw,
 }
+
+parser = reqparse.RequestParser()
+parser.add_argument('title', type=str)
+parser.add_argument('description', type=str)
+parser.add_argument('rating', type=float)
+parser.add_argument('tags', type=str)
 
 
 class Photo(restful.Resource):
@@ -24,4 +32,26 @@ class Photo(restful.Resource):
         return abort(404, message="Photo {} doesn't exist".format(photo_id))
 
 
+class PhotoList(restful.Resource):
+    @login_required
+    @marshal_with(photo_fields)
+    def post(self):
+        args = parser.parse_args()
+        photo = models.Photo()
+        photo.title = args.get("title")
+        photo.description = args.get("description")
+        photo.rating = args.get("rating")
+        photo.user = current_user
+        db.session.add(photo)
+        db.session.commit()
+
+        tags = args.get("tags")
+        if tags:
+            for tag_name in tags.split(","):
+                photo.add_tag(tag_name.strip())
+
+        return photo
+
+
 api.add_resource(Photo, '/api/v1/photos/<int:photo_id>')
+api.add_resource(PhotoList, "/api/v1/photos")

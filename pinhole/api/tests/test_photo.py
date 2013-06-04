@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from collections import OrderedDict
 from nose.tools import assert_equal
 from pinhole.common import models
 from pinhole.common.app import db
@@ -43,3 +44,28 @@ class TestPhotoController(BaseTest):
                            expect_errors=True)
 
         assert_equal(res.status_int, 404)
+
+    def test_post_photo(self):
+        self.login("john2", "doe")
+        params = OrderedDict([("title", "my title"),
+                              ("description", "my description"),
+                              ("rating", "1.3")])
+        res = self.app.post("/api/v1/photos", params)
+
+        assert_equal(res.status_int, 200)
+        assert_equal(res.json["title"], "my title")
+        assert_equal(res.json["description"], "my description")
+        assert_equal(res.json["rating"], 1.3)
+
+    def test_post_photo_with_tags(self):
+        self.login("john2", "doe")
+        params = OrderedDict([("title", "my title"),
+                              ("description", "my description"),
+                              ("rating", "1.3"),
+                              ("tags", "vacations,party, summer")])
+        res = self.app.post("/api/v1/photos", params)
+
+        assert_equal(res.status_int, 200)
+        assert_equal(res.json["title"], "my title")
+        assert_equal(res.json["description"], "my description")
+        assert_equal(res.json["rating"], 1.3)
