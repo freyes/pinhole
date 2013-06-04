@@ -20,8 +20,10 @@ def login():
     if request.method == "POST" and "username" in request.form:
         #import ipdb; ipdb.set_trace()
         username = request.form["username"]
+        password = request.form["password"]
         user = User.get_by(username=username)
-        if user:
+
+        if user and user.check_password(password):
             remember = request.form.get("remember", "no") == "yes"
             if login_user(user, remember=remember):
                 flash("Logged in!")

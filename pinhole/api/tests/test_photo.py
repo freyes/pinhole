@@ -8,7 +8,7 @@ class TestPhotoController(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
         self.user = models.User("john", "john@example.com")
-        self.user.password = "doe"
+        self.user.set_password("doe")
         db.session.add(self.user)
         db.session.commit()
 

@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 from flask.ext.sqlalchemy import SQLAlchemy
-
+from .auth import check_password, make_password
 
 db = SQLAlchemy()
 
@@ -19,6 +20,7 @@ class BaseModel(object):
 class User(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
+    password = db.Column(db.String(60))
     email = db.Column(db.String(120), unique=True)
     active = db.Column(db.Boolean(), default=True, nullable=False)
 
@@ -37,6 +39,33 @@ class User(db.Model, BaseModel):
 
     def is_authenticated(self):
         return True
+
+    def check_password(self, raw_password):
+        """
+        Returns a boolean of whether the raw_password was correct. Handles
+        encryption formats behind the scenes.
+
+        :param raw_password: the password that should be checked
+                             against the saved one
+        :type raw_password: str
+        :returns: True if the password matches, False otherwise
+        :rtype: bool
+        """
+        return check_password(raw_password, self.password)
+
+    def set_password(self, raw_password, commit=False):
+        """
+        Transform the password with a hash function and the store it
+
+        :param raw_password: the password to set
+        :type raw_password: str
+        :param commit: commit the session on True
+        :type commit: bool
+        """
+        self.password = make_password(raw_password)
+        db.session.add(self)
+        if commit:
+            db.session.commit()
 
 
 class Tag(db.Model, BaseModel):

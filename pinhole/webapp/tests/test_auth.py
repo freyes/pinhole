@@ -7,7 +7,7 @@ class TestLogin(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
         self.u = User("super", "duper@example.com")
-        self.u.password = "aqwsed7890"
+        self.u.set_password("aqwsed7890")
         db.session.add(self.u)
         db.session.commit()
 
