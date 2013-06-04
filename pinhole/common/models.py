@@ -93,6 +93,10 @@ class Photo(db.Model, BaseModel):
     url = db.Column(db.String(2000))
     rating = db.Column(db.Float)
 
+    width = db.Column(db.Integer)
+    height = db.Column(db.Integer)
+    type = db.Column(db.String(20))
+
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User", backref=db.backref("photos",
                                                       lazy="dynamic"))
@@ -105,6 +109,12 @@ class Photo(db.Model, BaseModel):
 
     def __repr__(self):
         return "<Photo %d>" % (self.id, )
+
+    def __getitem__(self, key):
+        if hasattr(self, key):
+            return getattr(self, key)
+        else:
+            raise KeyError(key)
 
     def add_tag(self, name):
         assert self.user is not None

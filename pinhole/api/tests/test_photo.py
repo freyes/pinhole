@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from collections import OrderedDict
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_in, assert_is_instance
 from pinhole.common import models
 from pinhole.common.app import db
 from .base import BaseTest
@@ -69,3 +69,8 @@ class TestPhotoController(BaseTest):
         assert_equal(res.json["title"], "my title")
         assert_equal(res.json["description"], "my description")
         assert_equal(res.json["rating"], 1.3)
+        assert_in("tags", res.json)
+        assert_is_instance(res.json["tags"], list)
+        assert_equal(len(res.json["tags"]), 3, res.json["tags"])
+        assert_equal(sorted([x["name"] for x in res.json["tags"]]),
+                     sorted(["vacations", "party", "summer"]))
