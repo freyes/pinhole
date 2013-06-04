@@ -8,3 +8,5 @@ pinhole.egg-info
 .ropeproject
 docs/_build
 .coverage
+coverage.xml
+xunit.xml
