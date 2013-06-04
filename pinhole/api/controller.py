@@ -10,12 +10,12 @@ from pinhole.common.app import api, db
 tag_fields = {
     "id": fields.Integer,
     "name": fields.String,
-    }
+}
 
 roll_fields = {
     'id': fields.Integer,
     "timestamp": fields.DateTime,
-    }
+}
 
 photo_fields = {
     'id': fields.Integer,
