@@ -1,6 +1,7 @@
 from flask.ext import restful
 from flask.ext.restful import abort, fields, marshal_with, reqparse
 from flask.ext.login import login_required, current_user
+from werkzeug.datastructures import FileStorage
 from pinhole.common import models
 from pinhole.common.app import api, db
 
@@ -33,6 +34,8 @@ photo_parser.add_argument('title', type=str)
 photo_parser.add_argument('description', type=str)
 photo_parser.add_argument('rating', type=float)
 photo_parser.add_argument('tags', type=str)
+photo_parser.add_argument('picture', type=FileStorage, location='files',
+                          required=False)
 
 
 class Photo(restful.Resource):
@@ -52,7 +55,7 @@ class PhotoList(restful.Resource):
     @marshal_with(photo_fields)
     def post(self):
         args = photo_parser.parse_args()
-        photo = models.Photo()
+        photo = models.Photo.from_file(args.get("picture"))
         photo.title = args.get("title")
         photo.description = args.get("description")
         photo.rating = args.get("rating")

@@ -97,6 +97,8 @@ class Photo(db.Model, BaseModel):
     height = db.Column(db.Integer)
     type = db.Column(db.String(20))
 
+    s3_path = db.Column(db.String(2048), unique=True)
+
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User", backref=db.backref("photos",
                                                       lazy="dynamic"))
@@ -132,6 +134,11 @@ class Photo(db.Model, BaseModel):
         ti.values(photo_id=self.id, tag_id=tag.id).execute()
 
         db.session.commit()
+
+    @classmethod
+    def from_file(cls, f):
+        # TODO upload to S3
+        return cls()
 
 
 class Roll(db.Model, BaseModel):
