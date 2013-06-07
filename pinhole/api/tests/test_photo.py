@@ -1,9 +1,13 @@
 from __future__ import absolute_import
+from os import path
 from collections import OrderedDict
 from nose.tools import assert_equal, assert_in, assert_is_instance
+from webtest.forms import Upload
 from pinhole.common import models
 from pinhole.common.app import db
 from .base import BaseTest
+
+DOT = path.dirname(path.abspath(__file__))
 
 
 class TestPhotoController(BaseTest):
@@ -47,9 +51,15 @@ class TestPhotoController(BaseTest):
 
     def test_post_photo(self):
         self.login("john2", "doe")
+
+        with open(path.join(DOT, "fixtures",
+                            "4843655940_d8dd79d602_o.jpg")) as f:
+            picture = Upload("4843655940_d8dd79d602_o.jpg", f.read())
+
         params = OrderedDict([("title", "my title"),
                               ("description", "my description"),
-                              ("rating", "1.3")])
+                              ("rating", "1.3"),
+                              ("picture", picture)])
         res = self.app.post("/api/v1/photos", params)
 
         assert_equal(res.status_int, 200)
@@ -59,9 +69,15 @@ class TestPhotoController(BaseTest):
 
     def test_post_photo_with_tags(self):
         self.login("john2", "doe")
+
+        with open(path.join(DOT, "fixtures",
+                            "4843655940_d8dd79d602_o.jpg")) as f:
+            picture = Upload("4843655940_d8dd79d602_o.jpg", f.read())
+
         params = OrderedDict([("title", "my title"),
                               ("description", "my description"),
                               ("rating", "1.3"),
+                              ("picture", picture),
                               ("tags", "vacations,party, summer")])
         res = self.app.post("/api/v1/photos", params)
 

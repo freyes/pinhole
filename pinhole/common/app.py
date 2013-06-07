@@ -19,7 +19,7 @@ db.app = app
 db.init_app(app)
 
 # api setup
-api = Api(app)
+api = Api(app, prefix="/api/v1")
 
 login_manager = LoginManager()
 login_manager.init_app(app)

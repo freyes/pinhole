@@ -1,41 +1,10 @@
+from __future__ import absolute_import
 from flask.ext import restful
-from flask.ext.restful import abort, fields, marshal_with, reqparse
+from flask.ext.restful import abort, marshal_with
 from flask.ext.login import login_required, current_user
-from werkzeug.datastructures import FileStorage
 from pinhole.common import models
 from pinhole.common.app import api, db
-
-
-# TODO: put all the public fields here
-tag_fields = {
-    "id": fields.Integer,
-    "name": fields.String,
-}
-
-roll_fields = {
-    'id': fields.Integer,
-    "timestamp": fields.DateTime,
-}
-
-photo_fields = {
-    'id': fields.Integer,
-    'title': fields.String,
-    'description': fields.String,
-    "timestamp": fields.DateTime,
-    "roll": fields.Nested(roll_fields),
-    "public": fields.Boolean,
-    'rating': fields.Raw,
-    "tags": fields.List(fields.Nested(tag_fields)),
-}
-
-
-photo_parser = reqparse.RequestParser()
-photo_parser.add_argument('title', type=str)
-photo_parser.add_argument('description', type=str)
-photo_parser.add_argument('rating', type=float)
-photo_parser.add_argument('tags', type=str)
-photo_parser.add_argument('picture', type=FileStorage, location='files',
-                          required=False)
+from .params import photo_fields, photo_parser
 
 
 class Photo(restful.Resource):
@@ -55,7 +24,7 @@ class PhotoList(restful.Resource):
     @marshal_with(photo_fields)
     def post(self):
         args = photo_parser.parse_args()
-        photo = models.Photo.from_file(args.get("picture"))
+        photo = models.Photo.from_file(current_user, args.get("picture"))
         photo.title = args.get("title")
         photo.description = args.get("description")
         photo.rating = args.get("rating")
@@ -71,5 +40,5 @@ class PhotoList(restful.Resource):
         return photo
 
 
-api.add_resource(Photo, '/api/v1/photos/<int:photo_id>')
-api.add_resource(PhotoList, "/api/v1/photos")
+api.add_resource(Photo, '/photos/<int:photo_id>')
+api.add_resource(PhotoList, "/photos")

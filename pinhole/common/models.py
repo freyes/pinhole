@@ -1,6 +1,10 @@
 from __future__ import absolute_import
+import uuid
+from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
+from boto.s3.key import Key
 from .auth import check_password, make_password
+from .s3 import S3Adapter
 
 db = SQLAlchemy()
 
@@ -31,6 +35,7 @@ class User(db.Model, BaseModel):
     def __repr__(self):
         return '<User %r>' % self.username
 
+    # required by flask-login
     def is_active(self):
         return self.active
 
@@ -39,6 +44,12 @@ class User(db.Model, BaseModel):
 
     def is_authenticated(self):
         return True
+    # end required by flask-login
+
+    @property
+    def fullname(self):
+        return u"%s %s" % (self.first_name or '',
+                           self.last_name or '')
 
     def check_password(self, raw_password):
         """
@@ -135,10 +146,65 @@ class Photo(db.Model, BaseModel):
 
         db.session.commit()
 
+    def set_contents_from(self, f):
+        """
+        Populate the object with all the information that can be extracted
+        from a photo file (i.e. EXIF metadata, width, height, etc)
+
+        :param f: photo content
+        """
+
     @classmethod
-    def from_file(cls, f):
-        # TODO upload to S3
-        return cls()
+    def from_file(cls, user, f):
+        """
+        Creates a :class:`pinhole.common.models.Photo` instance and populates
+        the properties
+
+        :param user: the owner of the photo, it can be a ``User`` instance or
+                     a username
+        :type user: :class:`pinhole.common.models.User` or str
+        :param f: the file
+        :type: :class:`werkzeug.datastructures.FileStorage`
+        :returns: the photo instance populated
+        :rtype: :class:`pinhole.common.models.Photo`
+        """
+        from .app import app
+        if isinstance(user, basestring):
+            user = User.get_by(username=user)
+
+        assert user is not None
+
+        photo = cls()
+        photo.user = user
+
+        # do we have to offload the upload process
+        # to a celery task?
+        s3conn = S3Adapter()
+        bucket = s3conn.get_bucket(app.config["PHOTO_BUCKET"])
+        k = Key(bucket)
+        k.key = photo.gen_s3_key(f.stream.filename)
+        k.set_contents_from_file(f.stream.stream)
+
+        photo.s3_path = "s3://%s%s" % (bucket.name, k.key)
+        db.session.add(photo)
+        db.session.commit()
+
+        return photo
+
+    def gen_s3_key(self, fname):
+        """
+        Generate a unique S3 key where the photo will be uploaded
+
+        :param fname: file name
+        :type fname: str
+        :rtype: str
+        :returns: a S3 key (i.e. `foo/bar/myphoto.jpg`)
+        """
+        uid = uuid.uuid1()
+        return "%s/%s/%s/%s_%s" % (self.user.username,
+                                   datetime.now().strftime("%Y_%m_%d"),
+                                   uid, uid,
+                                   fname)
 
 
 class Roll(db.Model, BaseModel):

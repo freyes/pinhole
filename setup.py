@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name="pinhole",
-    version="0.0.1dev",
+    version="0.1.0dev",
     author="Felipe Reyes",
     author_email="freyes@tty.cl",
     description="A photo manager on the cloud",
