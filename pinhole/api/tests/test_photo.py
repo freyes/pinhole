@@ -54,7 +54,7 @@ class TestPhotoController(BaseTest):
         yield self.check_post_photo
         yield self.check_post_photo, "vacations,party, summer"
         yield self.check_post_photo, "vacations"
-        yield self.check_post_photo, ", ".join(["tag%d" % i for i in range(100)])
+        yield self.check_post_photo, ", ".join(["t%d" % i for i in range(100)])
 
     def check_post_photo(self, tags=None):
         self.login("john2", "doe")
