@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     install_requires=["flask", "flask-restful", "flask-sqlalchemy",
                       "flask-login", "boto", "Sphinx",
-                      "sphinxcontrib-httpdomain"],
+                      "sphinxcontrib-httpdomain", "PIL"],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",

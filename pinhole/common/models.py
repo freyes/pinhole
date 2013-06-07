@@ -1,12 +1,16 @@
 from __future__ import absolute_import
 import uuid
 from datetime import datetime
+from PIL import Image, ExifTags
 from flask.ext.sqlalchemy import SQLAlchemy
 from boto.s3.key import Key
 from .auth import check_password, make_password
 from .s3 import S3Adapter
+from .exif import exif_transform
 
 db = SQLAlchemy()
+exif_tags = ExifTags.TAGS
+exif_tags[316] = "HostComputer"
 
 
 class BaseModel(object):
@@ -110,6 +114,18 @@ class Photo(db.Model, BaseModel):
 
     s3_path = db.Column(db.String(2048), unique=True)
 
+    # exif metadata
+    Make = db.Column(db.String(40))
+    Model = db.Column(db.String(40))
+    Software = db.Column(db.String(40))
+    HostComputer = db.Column(db.String(40))
+    Orientation = db.Column(db.Integer)
+
+    DateTime = db.Column(db.DateTime)
+    DateTimeDigitized = db.Column(db.DateTime)
+    DateTimeOriginal = db.Column(db.DateTime)
+
+    # relationships
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User", backref=db.backref("photos",
                                                       lazy="dynamic"))
@@ -186,10 +202,28 @@ class Photo(db.Model, BaseModel):
         k.set_contents_from_file(f.stream.stream)
 
         photo.s3_path = "s3://%s%s" % (bucket.name, k.key)
+
+        # process exif tags
+        f.stream.stream.seek(0)
+        photo.process_exif(f.stream.stream)
+
         db.session.add(photo)
         db.session.commit()
 
         return photo
+
+    def process_exif(self, stream):
+        ret = {}
+        i = Image.open(stream)
+        info = i._getexif()
+        for tag, value in info.items():
+            decoded = exif_tags.get(tag, tag)
+            if isinstance(decoded, basestring) and hasattr(self, decoded):
+                if decoded in exif_transform:
+                    value = exif_transform[decoded](value)
+                setattr(self, decoded, value)
+            ret[decoded] = value
+        return ret
 
     def gen_s3_key(self, fname):
         """
