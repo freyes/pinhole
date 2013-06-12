@@ -8,7 +8,7 @@ from .auth import check_password, make_password
 from .s3 import S3Adapter
 from .exif import exif_transform
 
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={"expire_on_commit": False})
 exif_tags = ExifTags.TAGS
 exif_tags[316] = "HostComputer"
 
@@ -24,12 +24,18 @@ class BaseModel(object):
         else:
             raise ValueError("More than 1 rows matched")
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
 
 class User(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(60))
     email = db.Column(db.String(120), unique=True)
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
     active = db.Column(db.Boolean(), default=True, nullable=False)
 
     def __init__(self, username, email):
@@ -102,7 +108,7 @@ tags = db.Table('tag_photo',
 class Photo(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(120))
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=datetime.now)
     public = db.Column(db.Boolean, default=False)
     description = db.Column(db.Text)
     url = db.Column(db.String(2000))
@@ -112,7 +118,11 @@ class Photo(db.Model, BaseModel):
     height = db.Column(db.Integer)
     type = db.Column(db.String(20))
 
-    s3_path = db.Column(db.String(2048), unique=True)
+    s3_path = db.Column(db.String(2048), unique=True, nullable=True)
+
+    # deleted ?
+    deleted = db.Column(db.Boolean, default=False)
+    deleted_at = db.Column(db.DateTime, nullable=True)
 
     # exif metadata
     Make = db.Column(db.String(40))
