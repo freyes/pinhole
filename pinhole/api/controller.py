@@ -1,10 +1,18 @@
 from __future__ import absolute_import
+import re
+import operator
+from datetime import datetime
+from sqlalchemy.sql.expression import and_
+from flask import request
 from flask.ext import restful
 from flask.ext.restful import abort, marshal_with
 from flask.ext.login import login_required, current_user
 from pinhole.common import models
 from pinhole.common.app import api, db
-from .params import photo_fields, photo_parser
+from .params import photo_fields, photo_parser, photolist_parser
+
+
+RE_OP = re.compile("^(.*)__(lt|le|eq|ne|ge|gt)$")
 
 
 class Photo(restful.Resource):
@@ -17,6 +25,20 @@ class Photo(restful.Resource):
             return photos.first()
 
         return abort(404, message="Photo {} doesn't exist".format(photo_id))
+
+    @login_required
+    def delete(self, photo_id):
+        photos = models.Photo.query.filter_by(id=photo_id,
+                                              user_id=current_user.id)
+        if photos.count() == 0:
+            return abort(404,
+                         message="Photo {} doesn't exist".format(photo_id))
+
+        photo = photos.first()
+        photo.deleted = True
+        photo.deleted_at = datetime.now()
+        db.session.add(photo)
+        db.session.commit()
 
 
 class PhotoList(restful.Resource):
@@ -38,6 +60,29 @@ class PhotoList(restful.Resource):
                 photo.add_tag(tag_name.strip())
 
         return photo
+
+    @login_required
+    @marshal_with(photo_fields)
+    def get(self):
+        args = photolist_parser.parse_args()
+        photos = models.Photo.query.filter_by(user_id=current_user.id)
+        filters = and_()
+
+        for key in request.args:
+            matched = RE_OP.match(key)
+            if matched and matched.group(1) in photo_fields:
+                prop = getattr(models.Photo, matched.group(1))
+                op = getattr(operator, matched.group(2))
+                filters.append(op(prop, request.args[key]))
+            elif key in photo_fields:
+                prop = getattr(models.Photo, key)
+                filters.append(prop == request.args[key])
+
+        photos = photos.filter(filters)
+        if args["order_by"] in photo_fields:
+            photos = photos.order_by(args["order_by"])
+
+        return photos.all()
 
 
 api.add_resource(Photo, '/photos/<int:photo_id>')

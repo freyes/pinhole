@@ -1,11 +1,17 @@
 from __future__ import absolute_import
+import json
 from os import path
+from urllib import urlencode
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
+from flask.ext.restful import marshal
 from nose.tools import assert_equal, assert_in, assert_is_instance, assert_true
+from webtest import TestApp
 from webtest.forms import Upload
 from pinhole.common import models
-from pinhole.common.app import db
+from pinhole.common.app import db, app, application
+from pinhole.common.s3 import S3Adapter
+from pinhole.api.params import photo_fields
 from .base import BaseTest
 
 DOT = path.dirname(path.abspath(__file__))
@@ -100,3 +106,113 @@ class TestPhotoController(BaseTest):
         assert_equal(photo.Software, u'QuickTime 7.6.6')
         assert_equal(photo.HostComputer, u'Mac OS X 10.6.4')
         assert_equal(photo.Orientation, 1)
+
+
+class TestPhotoGetWithFilters(object):
+    @classmethod
+    def setUpClass(cls):
+        s3conn = S3Adapter()
+        bucket = s3conn.lookup(app.config["PHOTO_BUCKET"])
+        assert bucket is not None
+        cls.s3_keys = bucket.get_all_keys()
+
+        db.create_all()
+        cls.app = TestApp(application())
+
+        cls.user = models.User("john", "john@example.com")
+        cls.user.set_password("doe")
+        db.session.add(cls.user)
+        db.session.commit()
+
+        cls.roll = models.Roll()
+        cls.roll.timestamp = datetime.now()
+        db.session.add(cls.roll)
+        db.session.commit()
+
+        cls.photos = []
+        start = datetime.now() - timedelta(days=1)
+        for i in range(20):
+            photo = models.Photo()
+            photo.title = "Photo%.2d" % i
+            photo.description = "Photo desc"
+
+            photo.width = 10 * (i + 1)
+            photo.height = 10 * (i + 1)
+
+            # exif
+            photo.Make = "Make%s" % i
+            photo.Model = "Model%s" % i
+            photo.Software = "Software%s" % i
+            photo.HostComputer = "HostComputer%s" % i
+            photo.Orientation = 1
+            photo.DateTime = start + timedelta(seconds=3600 * i)
+            photo.DateTimeDigitized = start + timedelta(seconds=3600 * i + 1)
+            photo.DateTimeOriginal = start + timedelta(seconds=3600 * i + 2)
+            photo.user = cls.user
+            photo.roll = cls.roll
+
+            db.session.add(photo)
+            db.session.commit()
+            photo.add_tag("tag%s" % i)
+            cls.photos.append(photo)
+
+        cls.login("john", "doe")
+
+    @classmethod
+    def login(cls, username, password):
+        res = cls.app.get("/")
+        assert res.headers["Location"].endswith("/account/login?next=%2F"), \
+            res.headers["Location"]
+
+        res = res.follow()
+
+        frm = res.forms["frm_login"]
+        frm["username"] = username
+        frm["password"] = password
+        res = frm.submit()
+
+        res = res.follow()
+        res.mustcontain("Logged in")
+
+    @classmethod
+    def tearDownClass(cls):
+        s3conn = S3Adapter()
+        bucket = s3conn.lookup(app.config["PHOTO_BUCKET"])
+        assert bucket is not None
+        for key in bucket.get_all_keys():
+            if key not in cls.s3_keys:
+                key.delete()
+        db.drop_all()
+
+    def test_filters(self):
+        yield self.check_filters, {"Make": "Make2"}, \
+            json.loads(json.dumps(marshal([self.photos[2]],
+                                          photo_fields)))
+        data = marshal([p for p in self.photos if p.id > 10], photo_fields)
+        yield self.check_filters, {"id__gt": 10}, \
+            json.loads(json.dumps(data))
+        yield self.check_filters, {"id__lt": 0}, []
+
+    def check_filters(self, filters, expected):
+        res = self.app.get("/api/v1/photos?%s" % urlencode(filters))
+        assert_equal(set([x["id"] for x in res.json]),
+                     set([x["id"] for x in expected]))
+        assert_equal(len(res.json), len(expected))
+
+        la = sorted(res.json, key=lambda x: x["id"])
+        lb = sorted(expected, key=lambda x: x["id"])
+
+        for i in range(len(la)):
+            a = la[i]
+            b = lb[i]
+            self.compare_photo(a, b)
+
+    def compare_photo(self, a, b):
+        for key in a:
+            assert_in(key, b)
+            if not isinstance(a[key], dict) and not isinstance(a[key], list):
+                assert_equal(a[key], b[key],
+                             "a['%(key)s'] != b['%(key)s'] -> %(a)s != %(b)s"
+                             % {"key": key, "a": a[key], "b": b[key]})
+            elif isinstance(a[key], dict):
+                self.compare_photo(a[key], b[key])

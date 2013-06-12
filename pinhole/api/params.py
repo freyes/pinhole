@@ -27,6 +27,12 @@ photo_fields = {
     "tags": fields.List(fields.Nested(tag_fields)),
     "height": fields.Raw,
     "width": fields.Raw,
+    "Make": fields.Raw,
+    "Model": fields.Raw,
+    "Software": fields.Raw,
+    "DateTime": fields.DateTime,
+    "DateTimeDigitized": fields.DateTime,
+    "DateTimeOriginal": fields.DateTime,
 }
 
 
@@ -39,3 +45,7 @@ photo_parser.add_argument('rating', type=float)
 photo_parser.add_argument('tags', type=str)
 photo_parser.add_argument('picture', type=FileStorage, location='files',
                           required=True)
+
+photolist_parser = reqparse.RequestParser()
+photolist_parser.add_argument("order_by", type=str,
+                              default="DateTimeOriginal")
