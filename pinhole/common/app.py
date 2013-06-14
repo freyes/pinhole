@@ -28,11 +28,11 @@ login_manager.init_app(app)
 def application(environ=None, start_response=None):
     global app
 
-    # api controllers
+    # api controllersm dynamic import to prevent Chinese Lock
     for m in ["controller", ]:
         import_module("pinhole.api.%s" % m)
 
-    # web app controllers
+    # web app controllers dynamic import to prevent Chinese Lock
     for m in ["static", "auth"]:
         import_module("pinhole.webapp.%s" % m)
 
