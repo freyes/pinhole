@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# usage:
+# $ gunicorn -c development_server.py pinhole.common.app:application
+from os import environ
+
+bind = "%s:%s" % (environ.get("IPADDR", '127.0.0.1'), 
+                  environ.get("PORT", '8000'))
+debug = True
+workers = 1
+max_requests = 1
