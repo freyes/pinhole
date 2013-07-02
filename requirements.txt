@@ -4,3 +4,4 @@ flask-sqlalchemy
 flask-login
 boto
 Sphinx
+http://pkgs.fedoraproject.org/repo/pkgs/python-imaging/Imaging-1.1.7.tar.gz/fc14a54e1ce02a0225be8854bfba478e/Imaging-1.1.7.tar.gz
