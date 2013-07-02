@@ -1,0 +1,10 @@
+nose
+rednose
+pysqlite
+ipython
+ipdb
+coverage
+WebTest
+nosexcover
+selenium
+git+git://github.com/freyes/selenium-webdriver-wsgi.git#egg=selwsgi
