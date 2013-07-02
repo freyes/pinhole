@@ -1,1 +1,1 @@
-
+$('.photoset-grid-basic').photosetGrid();

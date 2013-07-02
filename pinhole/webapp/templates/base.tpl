@@ -37,7 +37,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </a>
-                    <a class="brand" href="#">Project name</a>
+                    <a class="brand" href="#">Pinhole</a>
                     <div class="nav-collapse collapse">
                         <ul class="nav">
                             <li class="active"><a href="#">Home</a></li>
@@ -72,7 +72,7 @@
             <hr>
 
             <footer>
-                <p>&copy; Company 2012</p>
+                <p>&copy; Pinhole 2012</p>
             </footer>
 
         </div> <!-- /container -->
@@ -81,7 +81,7 @@
         <script>window.jQuery || document.write('<script src="/media/js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
 
         <script src="/media/js/vendor/bootstrap.min.js"></script>
-
+        {% block jslibs %}{% endblock %}
         <script src="/media/js/main.js"></script>
 
         <script>
@@ -90,5 +90,6 @@
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
+        {% block javascript %}{%endblock%}
     </body>
 </html>

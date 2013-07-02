@@ -33,10 +33,16 @@ def application(environ=None, start_response=None):
         import_module("pinhole.api.%s" % m)
 
     # web app controllers dynamic import to prevent Chinese Lock
-    for m in ["static", "auth"]:
+    for m in ["main", "static", "auth", "upload"]:
         import_module("pinhole.webapp.%s" % m)
 
     if not environ or not start_response:
         return app
     else:
         return app(environ, start_response)
+
+try:
+    db.create_all()
+except Exception as ex:
+    import traceback
+    traceback.print_exc()
