@@ -3,5 +3,5 @@ App.UploadedPhoto = DS.Model.extend({
     filename: DS.attr('string'),
     size: DS.attr('string'),
     key: DS.attr("string"),
-    isWriteable: DS.attr("string")
+    isWriteable: DS.attr("boolean")
 });
