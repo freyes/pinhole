@@ -8,3 +8,5 @@ bind = "%s:%s" % (environ.get("IPADDR", '127.0.0.1'),
 debug = True
 workers = 1
 max_requests = 1
+worker_class = "sync"
+timeout = 900000
