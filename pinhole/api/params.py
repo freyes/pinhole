@@ -16,6 +16,14 @@ roll_fields = {
     "timestamp": fields.DateTime,
 }
 
+uploaded_photo_fields = {
+    "id": fields.Integer,
+    "url": fields.String,
+    "filename": fields.String,
+    "size": fields.Integer,
+    "key": fields.String
+}
+
 photo_fields = {
     'id': fields.Integer,
     'title': fields.String,

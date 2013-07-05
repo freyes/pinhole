@@ -5,11 +5,12 @@ from datetime import datetime
 from sqlalchemy.sql.expression import and_
 from flask import request
 from flask.ext import restful
-from flask.ext.restful import abort, marshal_with
+from flask.ext.restful import abort, marshal_with, fields, marshal
 from flask.ext.login import login_required, current_user
 from pinhole.common import models
 from pinhole.common.app import api, db
-from .params import photo_fields, photo_parser, photolist_parser
+from .params import (photo_fields, photo_parser, photolist_parser,
+                     uploaded_photo_fields)
 
 
 RE_OP = re.compile("^(.*)__(lt|le|eq|ne|ge|gt)$")
@@ -85,5 +86,29 @@ class PhotoList(restful.Resource):
         return photos.all()
 
 
+class UploadedPhotos(restful.Resource):
+    @login_required
+    @marshal_with(photo_fields)
+    def get(self):
+        return []
+
+    @login_required
+    def post(self):
+        o = models.UploadedPhoto()
+        o.user_id = current_user.id
+        for key, value in request.json["uploaded_photo"].items():
+            if hasattr(o, key):
+                setattr(o, key, value)
+        db.session.add(o)
+        db.session.commit()
+
+        # TODO: queue task to process the photo
+        # task = ProcessUploadedPhoto().apply_async()
+
+        fs = {"uploaded_photo": fields.Nested(uploaded_photo_fields)}
+        return marshal({"uploaded_photo": o}, fs), 200
+
+
 api.add_resource(Photo, '/photos/<int:photo_id>')
 api.add_resource(PhotoList, "/photos")
+api.add_resource(UploadedPhotos, "/uploaded_photos")

@@ -105,6 +105,20 @@ tags = db.Table('tag_photo',
                 )
 
 
+class UploadedPhoto(db.Model, BaseModel):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    url = db.Column(db.String(2000))
+    filename = db.Column(db.String(200))
+    size = db.Column(db.Integer)
+    key = db.Column(db.String(100))
+    is_writeable = db.Column(db.Boolean)
+
+    # relationships
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship("User", backref=db.backref("uploaded_photos",
+                                                      lazy="dynamic"))
+
+
 class Photo(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(120))
