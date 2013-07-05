@@ -16,13 +16,17 @@ roll_fields = {
     "timestamp": fields.DateTime,
 }
 
-uploaded_photo_fields = {
+up_photo_fields = {
     "id": fields.Integer,
     "url": fields.String,
     "filename": fields.String,
     "size": fields.Integer,
     "key": fields.String
 }
+
+
+uploaded_photos_fields = {"uploaded_photos": fields.List(fields.Nested(up_photo_fields))}
+uploaded_photo_fields = {"uploaded_photo": fields.Nested(up_photo_fields)}
 
 photo_fields = {
     'id': fields.Integer,

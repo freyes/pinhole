@@ -112,6 +112,7 @@ class UploadedPhoto(db.Model, BaseModel):
     size = db.Column(db.Integer)
     key = db.Column(db.String(100))
     is_writeable = db.Column(db.Boolean)
+    processed = db.Column(db.Boolean, default=False)
 
     # relationships
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))

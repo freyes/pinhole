@@ -10,7 +10,7 @@ from flask.ext.login import login_required, current_user
 from pinhole.common import models
 from pinhole.common.app import api, db
 from .params import (photo_fields, photo_parser, photolist_parser,
-                     uploaded_photo_fields)
+                     uploaded_photo_fields, uploaded_photos_fields)
 
 
 RE_OP = re.compile("^(.*)__(lt|le|eq|ne|ge|gt)$")
@@ -88,9 +88,10 @@ class PhotoList(restful.Resource):
 
 class UploadedPhotos(restful.Resource):
     @login_required
-    @marshal_with(photo_fields)
+    @marshal_with(uploaded_photos_fields)
     def get(self):
-        return []
+        return {"uploaded_photos": models.UploadedPhoto.query.filter_by(user_id=current_user.id,
+                                                    processed=False).all()}
 
     @login_required
     def post(self):
@@ -105,8 +106,7 @@ class UploadedPhotos(restful.Resource):
         # TODO: queue task to process the photo
         # task = ProcessUploadedPhoto().apply_async()
 
-        fs = {"uploaded_photo": fields.Nested(uploaded_photo_fields)}
-        return marshal({"uploaded_photo": o}, fs), 200
+        return marshal({"uploaded_photo": o}, uploaded_photo_fields), 200
 
 
 api.add_resource(Photo, '/photos/<int:photo_id>')
