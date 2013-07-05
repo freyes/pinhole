@@ -5,7 +5,7 @@
   <div class="row">
     <div class="login-form text-center">
       <h2>Login</h2>
-      <form action="">
+      <form action="" method="POST">
         <fieldset>
           <div class="clearfix">
             <input type="text" name="username" placeholder="Username">
