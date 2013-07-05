@@ -8,3 +8,4 @@ WebTest
 nosexcover
 selenium
 git+git://github.com/freyes/selenium-webdriver-wsgi.git#egg=selwsgi
+https://closure-linter.googlecode.com/files/closure_linter-2.3.10.tar.gz
