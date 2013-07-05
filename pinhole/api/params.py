@@ -25,7 +25,8 @@ up_photo_fields = {
 }
 
 
-uploaded_photos_fields = {"uploaded_photos": fields.List(fields.Nested(up_photo_fields))}
+uploaded_photos_fields = {"uploaded_photos":
+                          fields.List(fields.Nested(up_photo_fields))}
 uploaded_photo_fields = {"uploaded_photo": fields.Nested(up_photo_fields)}
 
 photo_fields = {

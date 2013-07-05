@@ -90,8 +90,9 @@ class UploadedPhotos(restful.Resource):
     @login_required
     @marshal_with(uploaded_photos_fields)
     def get(self):
-        return {"uploaded_photos": models.UploadedPhoto.query.filter_by(user_id=current_user.id,
-                                                    processed=False).all()}
+        photos = models.UploadedPhoto.query.filter_by(user_id=current_user.id,
+                                                      processed=False)
+        return {"uploaded_photos": photos.all()}
 
     @login_required
     def post(self):
