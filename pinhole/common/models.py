@@ -113,6 +113,7 @@ class UploadedPhoto(db.Model, BaseModel):
     key = db.Column(db.String(100))
     is_writeable = db.Column(db.Boolean)
     processed = db.Column(db.Boolean, default=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.now)
 
     # relationships
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))

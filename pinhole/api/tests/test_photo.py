@@ -216,3 +216,57 @@ class TestPhotoGetWithFilters(object):
                              % {"key": key, "a": a[key], "b": b[key]})
             elif isinstance(a[key], dict):
                 self.compare_photo(a[key], b[key])
+
+
+class TestUploadedPhotos(BaseTest):
+    def setUp(self):
+        BaseTest.setUp(self)
+        self.user = models.User("john", "john@example.com")
+        self.user.set_password("doe")
+        db.session.add(self.user)
+        db.session.commit()
+
+        self.now = datetime.now()
+
+    def create_uploaded_photos(self, n):
+        for i in range(n):
+            o = models.UploadedPhoto()
+            o.url = "http://example.com/photo_%d.jpg" % i
+            o.filename = "photo_%d.jpg" % i
+            o.size = (i + 1) * 10
+            o.key = "foo_%d" % i
+            o.is_writeable = False
+            o.uploaded_at = self.now
+            o.user_id = self.user.id
+
+            db.session.add(o)
+
+        db.session.commit()
+
+    def test_get_all(self):
+        self.create_uploaded_photos(5)
+
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/uploaded_photos")
+
+        assert_is_instance(res.json, dict)
+        assert_equal(["uploaded_photos"], res.json.keys())
+        l = res.json["uploaded_photos"]
+        assert_is_instance(l, list)
+        assert_equal(len(l), 5)
+
+        for i, item in enumerate(sorted(l, key=lambda x: x["size"])):
+            assert_in("url", item)
+            assert_equal(item["url"], "http://example.com/photo_%d.jpg" % i)
+
+            assert_in("filename", item)
+            assert_equal(item["filename"], "photo_%d.jpg" % i)
+
+            assert_in("size", item)
+            assert_equal(item["size"], (i + 1) * 10)
+
+            assert_in("key", item)
+            assert_equal(item["key"], "foo_%d" % i)
+
+            assert_in("is_writeable", item)
+            assert_equal(item["is_writeable"], False)

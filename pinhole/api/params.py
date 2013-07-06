@@ -21,7 +21,8 @@ up_photo_fields = {
     "url": fields.String,
     "filename": fields.String,
     "size": fields.Integer,
-    "key": fields.String
+    "key": fields.String,
+    "is_writeable": fields.Boolean
 }
 
 
