@@ -5,5 +5,5 @@ flask-login
 boto
 Sphinx
 sphinxcontrib-httpdomain
-http://pkgs.fedoraproject.org/repo/pkgs/python-imaging/Imaging-1.1.7.tar.gz/fc14a54e1ce02a0225be8854bfba478e/Imaging-1.1.7.tar.gz
+Pillow==2.1.0
 Celery==3.0
