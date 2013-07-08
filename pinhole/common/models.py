@@ -120,6 +120,9 @@ class UploadedPhoto(db.Model, BaseModel):
     user = db.relationship("User", backref=db.backref("uploaded_photos",
                                                       lazy="dynamic"))
 
+    def __repr__(self):
+        return "<UploadedPhoto:%s>" % self.id or "-"
+
 
 class Photo(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -224,19 +227,22 @@ class Photo(db.Model, BaseModel):
         s3conn = S3Adapter()
         bucket = s3conn.get_bucket(app.config["PHOTO_BUCKET"])
         k = Key(bucket)
-        k.key = photo.gen_s3_key(f.stream.filename)
-        k.set_contents_from_file(f.stream.stream)
+        k.key = photo.gen_s3_key(f.filename)
+        k.set_contents_from_file(f.stream)
 
         photo.s3_path = "s3://%s%s" % (bucket.name, k.key)
 
         # process exif tags
-        f.stream.stream.seek(0)
-        photo.process_exif(f.stream.stream)
+        f.stream.seek(0)
+        photo.process_exif(f.stream)
 
         db.session.add(photo)
         db.session.commit()
 
         return photo
+
+    def create_thumbnails(self):
+        pass
 
     def process_exif(self, stream):
         ret = {}

@@ -13,6 +13,7 @@ Contents:
 
    api
 
+   photos
 
 Indices and tables
 ==================

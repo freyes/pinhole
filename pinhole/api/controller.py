@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import re
 import operator
+import logging
 from datetime import datetime
 from sqlalchemy.sql.expression import and_
 from flask import request
@@ -9,11 +10,13 @@ from flask.ext.restful import abort, marshal_with, fields, marshal
 from flask.ext.login import login_required, current_user
 from pinhole.common import models
 from pinhole.common.app import api, db
+from pinhole.tasks.photos import ProcessUploadedPhoto
 from .params import (photo_fields, photo_parser, photolist_parser,
                      uploaded_photo_fields, uploaded_photos_fields)
 
 
 RE_OP = re.compile("^(.*)__(lt|le|eq|ne|ge|gt)$")
+logger = logging.getLogger(__name__)
 
 
 class Photo(restful.Resource):
@@ -47,7 +50,8 @@ class PhotoList(restful.Resource):
     @marshal_with(photo_fields)
     def post(self):
         args = photo_parser.parse_args()
-        photo = models.Photo.from_file(current_user, args.get("picture"))
+        photo = models.Photo.from_file(current_user,
+                                       args.get("picture").stream)
         photo.title = args.get("title")
         photo.description = args.get("description")
         photo.rating = args.get("rating")
@@ -104,8 +108,8 @@ class UploadedPhotos(restful.Resource):
         db.session.add(o)
         db.session.commit()
 
-        # TODO: queue task to process the photo
-        # task = ProcessUploadedPhoto().apply_async()
+        task = ProcessUploadedPhoto().apply_async(args=(o.id, ))
+        logger.debug("Sent %s" % task)
 
         return marshal({"uploaded_photo": o}, uploaded_photo_fields), 200
 

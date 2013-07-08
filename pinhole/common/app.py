@@ -12,7 +12,7 @@ TEMPLATES_DIR = path.join(path.dirname(path.abspath(__file__)), "..",
 # wgi setup
 app = Flask("pinhole.common", template_folder=TEMPLATES_DIR)
 app.config.from_object("pinhole.common.settings")
-app.config.from_envvar('PINHOLE_SETTINGS', silent=True)
+app.config.from_envvar('PINHOLE_SETTINGS')
 
 # database setup
 db.app = app
