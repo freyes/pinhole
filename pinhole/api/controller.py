@@ -130,12 +130,8 @@ class PhotoFile(restful.Resource):
 
         photo = photos.first()
 
-        # response = make_response(photo.get_image(size))
-        # response.headers["Content-Type"] = "image/jpeg"
-        # response.headers['Content-Disposition'] = 'attachment; filename=%s' % photo.
-
-        # return response
-        return send_file(photo.get_image(size), attachment_filename=photo.fname,
+        return send_file(photo.get_image(size),
+                         attachment_filename=photo.fname,
                          add_etags=False)
 
 

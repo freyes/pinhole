@@ -55,7 +55,9 @@ class TestPhotoController(BaseTest):
 
     def test_get_by_size(self):
         self.login("john", "doe")
-        res = self.app.get("/api/v1/photos/file/%d/thumbnail/4843655940_d8dd79d602_o.jpg" % self.photo_id)
+        url = "/api/v1/photos/file/%d/thumbnail/4843655940_d8dd79d602_o.jpg" \
+              % self.photo_id
+        res = self.app.get(url)
         # TODO: do the asserts
 
     def test_get_someone_else_photo(self):

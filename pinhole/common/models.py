@@ -186,7 +186,6 @@ class Photo(db.Model, BaseModel):
              "raw": None,
              }
 
-
     def __repr__(self):
         return "<Photo %d>" % (self.id, )
 
