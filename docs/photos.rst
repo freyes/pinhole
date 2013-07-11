@@ -24,3 +24,37 @@ Details about the storage, properties and other relevant information of the save
 +---------------+----------------+--------+--------+
 | Large 1024    |                |    800 |    536 |
 +---------------+----------------+--------+--------+
+
+
+Exif
+====
+
++-------+-------------+------------+
+| Value | 0th Row     | 0th Column |
++=======+=============+============+
+| 1     | top         | left side  |
++-------+-------------+------------+
+| 2     | top         | right side |
++-------+-------------+------------+
+| 3     | bottom      | right side |
++-------+-------------+------------+
+| 4     | bottom      | left side  |
++-------+-------------+------------+
+| 5     | left side   | top        |
++-------+-------------+------------+
+| 6     | right side  | top        |
++-------+-------------+------------+
+| 7     | right side  | bottom     |
++-------+-------------+------------+
+| 8     | left side   | bottom     |
++-------+-------------+------------+
+
+For convenience, here is what the letter F would look like if it were tagged correctly and displayed by a program that ignores the orientation tag (thus showing the stored image):
+
+      1        2       3      4         5            6           7          8
+
+    888888  888888      88  88      8888888888  88                  88  8888888888
+    88          88      88  88      88  88      88  88          88  88      88  88
+    8888      8888    8888  8888    88          8888888888  8888888888          88
+    88          88      88  88
+    88          88  888888  888888

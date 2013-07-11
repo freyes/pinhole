@@ -38,7 +38,8 @@ class ProcessUploadedPhoto(Task):
 
             fs = FileStorage(forig, uploaded_photo.filename)
             photo = models.Photo.from_file(uploaded_photo.user, fs)
-            photo.create_thumbnails()
+            forig.seek(0)
+            photo.create_thumbnails(uploaded_photo.filename, forig)
 
             # we are done.
             uploaded_photo.processed = True

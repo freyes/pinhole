@@ -4,12 +4,13 @@ import operator
 import logging
 from datetime import datetime
 from sqlalchemy.sql.expression import and_
-from flask import request
+from flask import request, make_response, send_file
 from flask.ext import restful
 from flask.ext.restful import abort, marshal_with, fields, marshal
 from flask.ext.login import login_required, current_user
 from pinhole.common import models
 from pinhole.common.app import api, db
+from pinhole.common.s3 import S3Adapter
 from pinhole.tasks.photos import ProcessUploadedPhoto
 from .params import (photo_fields, photo_parser, photolist_parser,
                      uploaded_photo_fields, uploaded_photos_fields)
@@ -114,6 +115,39 @@ class UploadedPhotos(restful.Resource):
         return marshal({"uploaded_photo": o}, uploaded_photo_fields), 200
 
 
-api.add_resource(Photo, '/photos/<int:photo_id>')
-api.add_resource(PhotoList, "/photos")
-api.add_resource(UploadedPhotos, "/uploaded_photos")
+class PhotoFile(restful.Resource):
+    @login_required
+    def get(self, photo_id, size, fname):
+        if size not in models.Photo.sizes:
+            return abort(404,
+                         message="Photo format {} doesn't exist".format(size))
+
+        photos = models.Photo.query.filter_by(id=photo_id,
+                                              user_id=current_user.id)
+        if photos.count() == 0:
+            return abort(404,
+                         message="Photo {} doesn't exist".format(photo_id))
+
+        photo = photos.first()
+
+        # response = make_response(photo.get_image(size))
+        # response.headers["Content-Type"] = "image/jpeg"
+        # response.headers['Content-Disposition'] = 'attachment; filename=%s' % photo.
+
+        # return response
+        return send_file(photo.get_image(size), attachment_filename=photo.fname,
+                         add_etags=False)
+
+
+endpoints = [(Photo, '/photos/<int:photo_id>'),
+             (PhotoList, "/photos"),
+             (UploadedPhotos, "/uploaded_photos"),
+             (PhotoFile,
+              '/photos/file/<int:photo_id>/<string:size>/<string:fname>'),
+             ]
+for args in endpoints:
+    try:
+        print "adding", args
+        api.add_resource(*args)
+    except ValueError:
+        pass

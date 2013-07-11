@@ -4,6 +4,7 @@ from os import path
 from urllib import urlencode
 from collections import OrderedDict
 from datetime import datetime, timedelta
+from werkzeug.datastructures import FileStorage
 from flask.ext.restful import marshal
 from nose.tools import assert_equal, assert_in, assert_is_instance, assert_true
 from webtest import TestApp
@@ -30,7 +31,10 @@ class TestPhotoController(BaseTest):
         db.session.add(self.user2)
         db.session.commit()
 
-        self.photo = models.Photo()
+        with open(path.join(DOT, "fixtures/4843655940_d8dd79d602_o.jpg")) as f:
+            fs = FileStorage(f, "4843655940_d8dd79d602_o.jpg")
+            self.photo = models.Photo.from_file(self.user, fs)
+
         self.photo.user = self.user
         self.photo.title = "Landscape"
         self.photo.description = """This is an awesome description"""
@@ -48,6 +52,11 @@ class TestPhotoController(BaseTest):
         assert "title" in res.json
         assert res.json["id"] == self.photo_id
         assert res.json["title"] == "Landscape"
+
+    def test_get_by_size(self):
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/photos/file/%d/thumbnail/4843655940_d8dd79d602_o.jpg" % self.photo_id)
+        # TODO: do the asserts
 
     def test_get_someone_else_photo(self):
         self.login("john2", "doe")
