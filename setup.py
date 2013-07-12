@@ -14,6 +14,7 @@ setup(
     description="A photo manager on the cloud",
     keywords="web api photo manager",
     packages=find_packages(),
+    test_suite = 'nose.collector',
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",
