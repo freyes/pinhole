@@ -12,7 +12,8 @@ from .auth import check_password, make_password
 from .s3 import S3Adapter
 from .exif import exif_transform
 
-db = SQLAlchemy(session_options={"expire_on_commit": False})
+#db = SQLAlchemy(session_options={"expire_on_commit": False})
+from .extensions import db
 exif_tags = ExifTags.TAGS
 exif_tags[316] = "HostComputer"
 
@@ -27,6 +28,12 @@ class BaseModel(object):
             return None
         else:
             raise ValueError("More than 1 rows matched")
+
+    def __getitem__(self, key):
+        if hasattr(self, key):
+            return getattr(self, key)
+        else:
+            raise KeyError(key)
 
     def save(self):
         db.session.add(self)
@@ -189,12 +196,6 @@ class Photo(db.Model, BaseModel):
     def __repr__(self):
         return "<Photo %d>" % (self.id, )
 
-    def __getitem__(self, key):
-        if hasattr(self, key):
-            return getattr(self, key)
-        else:
-            raise KeyError(key)
-
     @property
     def fname(self):
         parsed = urlparse(self.s3_path)
@@ -247,6 +248,7 @@ class Photo(db.Model, BaseModel):
 
         photo = cls()
         photo.user = user
+        photo.title = f.filename
 
         # do we have to offload the upload process
         # to a celery task?
@@ -353,7 +355,16 @@ class Photo(db.Model, BaseModel):
         """
         ret = {}
         i = Image.open(stream)
+        if not i:
+            msg = "Stream {} couldn't be opened as image".format(stream)
+            raise ValueError(msg)
+
         info = i._getexif()
+
+        if not info:
+            logger.info("Exif info not found in {}".format(i))
+            return ret
+
         for tag, value in info.items():
             decoded = exif_tags.get(tag, tag)
             if isinstance(decoded, basestring) and hasattr(self, decoded):

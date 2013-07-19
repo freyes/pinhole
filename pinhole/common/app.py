@@ -1,32 +1,33 @@
 from __future__ import absolute_import
+
 from os import path
 from importlib import import_module
 from flask import Flask
-from flask.ext.restful import Api
 from flask.ext.login import LoginManager
 
-from .models import db
+#from .models import db
+from .extensions import celery, db, app, login_manager
 
 TEMPLATES_DIR = path.join(path.dirname(path.abspath(__file__)), "..",
                           "webapp", "templates")
-# wgi setup
-app = Flask("pinhole.common", template_folder=TEMPLATES_DIR)
-app.config.from_object("pinhole.common.settings")
-app.config.from_envvar('PINHOLE_SETTINGS', silent=True)
-
-# database setup
-db.app = app
-db.init_app(app)
-
-# api setup
-api = Api(app, prefix="/api/v1")
-
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 
 def application(environ=None, start_response=None):
-    global app
+    # wgi setup
+    app.template_folder = TEMPLATES_DIR
+    app.config.from_object("pinhole.common.settings")
+    app.config.from_envvar('PINHOLE_SETTINGS', silent=True)
+
+    # celery
+    celery.config_from_object(app.config)
+
+    # database setup
+    if db.app is None:
+        db.app = app
+        db.init_app(app)
+
+    if not hasattr(app, "login_manager") or app.login_manager is None:
+        login_manager.init_app(app)
 
     # api controllersm dynamic import to prevent Chinese Lock
     for m in ["controller", ]:
@@ -41,8 +42,5 @@ def application(environ=None, start_response=None):
     else:
         return app(environ, start_response)
 
-try:
-    db.create_all()
-except Exception as ex:
-    import traceback
-    traceback.print_exc()
+
+application()

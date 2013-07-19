@@ -35,7 +35,7 @@ photo_fields = {
     'title': fields.String,
     'description': fields.String,
     "timestamp": fields.DateTime,
-    "roll": fields.Nested(roll_fields),
+    "roll_id": fields.Integer,
     "public": fields.Boolean,
     'rating': fields.Raw,
     "tags": fields.List(fields.Nested(tag_fields)),
@@ -49,6 +49,8 @@ photo_fields = {
     "DateTimeOriginal": fields.DateTime,
 }
 
+photos_fields = {"photos": fields.List(fields.Nested(photo_fields))}
+foto_fields = {"photo": fields.Nested(photo_fields)}
 
 photo_parser = reqparse.RequestParser()
 photo_parser.add_argument('title', type=str)
@@ -63,3 +65,17 @@ photo_parser.add_argument('picture', type=FileStorage, location='files',
 photolist_parser = reqparse.RequestParser()
 photolist_parser.add_argument("order_by", type=str,
                               default="DateTimeOriginal")
+
+_user_fields = {
+    "id": fields.Integer,
+    "username": fields.String,
+    "email": fields.String,
+    "first_name": fields.String,
+    "last_name": fields.String,
+    "active": fields.Boolean,
+}
+
+user_fields = {"user": fields.Nested(_user_fields)}
+users_fields = {"users": fields.List(fields.Nested(_user_fields))}
+user_parser = reqparse.RequestParser()
+user_parser.add_argument('username', type=str)

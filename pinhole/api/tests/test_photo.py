@@ -48,10 +48,14 @@ class TestPhotoController(BaseTest):
         self.login("john", "doe")
         res = self.app.get("/api/v1/photos/%d" % self.photo_id)
 
-        assert "id" in res.json
-        assert "title" in res.json
-        assert res.json["id"] == self.photo_id
-        assert res.json["title"] == "Landscape"
+        assert_is_instance(res.json, dict)
+        assert_in("photo", res.json)
+        o = res.json["photo"]
+        assert_is_instance(o, dict)
+        assert_in("id", o)
+        assert_in("title", o)
+        assert_equal(o["id"], self.photo_id)
+        assert_equal(o["title"], "Landscape")
 
     def test_get_by_size(self):
         self.login("john", "doe")
@@ -206,11 +210,17 @@ class TestPhotoGetWithFilters(object):
 
     def check_filters(self, filters, expected):
         res = self.app.get("/api/v1/photos?%s" % urlencode(filters))
-        assert_equal(set([x["id"] for x in res.json]),
-                     set([x["id"] for x in expected]))
-        assert_equal(len(res.json), len(expected))
 
-        la = sorted(res.json, key=lambda x: x["id"])
+        assert_is_instance(res.json, dict)
+        assert_in("photos", res.json)
+        objs = res.json["photos"]
+        assert_is_instance(objs, list)
+
+        assert_equal(set([x["id"] for x in objs]),
+                     set([x["id"] for x in expected]))
+        assert_equal(len(objs), len(expected))
+
+        la = sorted(objs, key=lambda x: x["id"])
         lb = sorted(expected, key=lambda x: x["id"])
 
         for i in range(len(la)):

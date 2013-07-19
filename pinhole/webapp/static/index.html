@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width">
 
-  <title>Ember Starter Kit</title>
+  <title>Pinhole</title>
 
   <link rel="stylesheet" href="/media/css/bootstrap.min.css">
   <link rel="stylesheet" href="/media/css/font-awesome.css">
@@ -28,64 +28,80 @@
 </head>
 <body>
 
-  <!-- header -->
-  <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
-        <a class="brand" href="#">Pinhole</a>
-        <div class="nav-collapse collapse">
-          <ul class="nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#/about">About</a></li>
-            <li><a href="#/upload"><i class="icon-upload icon-large"></i></a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li class="divider"></li>
-                <li class="nav-header">Nav header</li>
-                <li><a href="#">Separated link</a></li>
-                <li><a href="#">One more separated link</a></li>
-              </ul>
-            </li>
-          </ul>
-          <form id="frm_login" method="POST" class="navbar-form pull-right">
-            <input class="span2" name="username" type="text" placeholder="Username">
-            <input class="span2" name="password" type="password" placeholder="Password">
-            <button type="submit" class="btn">Sign in</button>
-          </form>
-        </div><!--/.nav-collapse -->
+  <script type="text/x-handlebars">
+    <!-- header -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Pinhole</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              {{#linkTo "index" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>Home</i></a>{{/linkTo}}
+              {{#linkTo "upload" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-upload icon-large"></i> Upload</a>{{/linkTo}}
+              {{#linkTo "about" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>About</i></a>{{/linkTo}}
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li class="nav-header">Nav header</li>
+                  <li><a href="#">Separated link</a></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>
+            </ul>
+            {{#if currentUser.isSignedIn }}
+               <ul class="nav pull-right">
+                 <li>{{currentUser.username}}</li>
+               </ul>
+            {{else}}
+              <form id="frm_login" method="POST" class="navbar-form pull-right">
+                <input class="span2" name="username" type="text" placeholder="Username">
+                <input class="span2" name="password" type="password" placeholder="Password">
+                <button type="submit" class="btn">Sign in</button>
+              </form>
+            {{/if}}
+          </div><!--/.nav-collapse -->
+        </div>
       </div>
     </div>
-  </div>
-  <!-- end of header -->
+    <!-- end of header -->
+    <!-- container -->
+    <div class="container">
+      {{outlet}}
+          <hr>
 
-    <script type="text/x-handlebars">
-      <!-- container -->
-      <div class="container">
-        {{outlet}}
-            <hr>
+          <footer>
+              <p>&copy; Pinhole 2012</p>
+          </footer>
 
-            <footer>
-                <p>&copy; Pinhole 2012</p>
-            </footer>
-
-      </div><!-- end of container -->
-    </script>
+    </div><!-- end of container -->
+    </script><!-- template: end index -->
 
     <script type="text/x-handlebars" data-template-name="index">
-    <ul>
-    {{#each item in model}}
-    <li>{{item}}</li>
-    {{/each}}
-    </ul>
+    <h1>{{#if currentUser.isSignedIn}}Hi, {{currentUser.username}}{{else}}Hello, Guest{{/if}}</h1>
+        <h2>Photos</h2>
+    <div class="row">
+      {{#each photo in content}}
+        <div class="span3">
+          {{#linkTo 'photos.view' photo}}
+            {{view App.ImgView srcBinding="photo.thumbnail" class="thumbnail img-polaroid"}} 
+          {{/linkTo}}
+          {{photo.title}}
+        </div>
+      {{else}}
+        <div class="span12">
+          <p>Sorry, you don't have photos, you should upload a few to start using pinhole.</p>
+        </div>
+      {{/each}}
+    </div>
     </script>
 
     <script type="text/x-handlebars" data-template-name="about">
@@ -96,7 +112,20 @@
         </div>
       </div>
     </script>
-
+    <script type="text/x-handlebars" data-template-name="home">
+      foo
+    </script>
+    <script type="text/x-handlebars" data-template-name="photos">
+      <h2>Photos</h2>
+      {{outlet}}
+    </script>
+    <script type="text/x-handlebars" data-template-name="photos/view">
+      <h2>{{model.title}}</h2>
+      <div class="span12">
+        {{view App.ImgView srcBinding="model.large_1024" class="img-polaroid"}}
+      </div>
+      <p class="span12">{{model.description}}</p>
+    </script>
     <script type="text/x-handlebars" data-template-name="upload">
       <div class="row">
         <div class="span12 text-right">
@@ -116,6 +145,28 @@
     </div>
     </script>
 
+    <script type="text/x-handlebars" data-template-name="logged-out">
+      <h1>Logged Out</h1>
+      <hr /><br />
+      <span>Login with "test/test"</span><br /><br />
+      <label>Username: </label>{{view Ember.TextField valueBinding="App.loginController.username"}}<br />
+      <label>Password: </label>{{view Ember.TextField valueBinding="App.loginController.password" type="password"}}<br />
+
+      {{#if App.loginController.isError}}
+          <span class="login-error">Error: Invalid username or password.</span><br />
+      {{/if}}
+    
+       <br /><button {{action "authenticate" target="App.stateManager"}}>Login</button>
+       </script>
+
+<!-- Logged In View -->
+<script type="text/x-handlebars" data-template-name="logged-in">
+  <h1>Logged In</h1>
+  
+  <hr /><br />
+  <span>Welcome to your app!</span><br /><br />
+  <button {{action "logout" target="App.stateManager"}}>Logout</button>
+</script>
     <hr>
 
   <script type="text/javascript" src="js/vendor/jquery-1.9.1.min.js"></script>
@@ -129,7 +180,7 @@
   <script type="text/javascript" src="js/models.js"></script>
   <script type="text/javascript" src="js/store.js"></script>
   <script type="text/javascript" src="js/views.js"></script>
-  <script type="text/javascript" src="js/fixtures.js"></script>
+  <script type="text/javascript" src="js/controller.js"></script>
 
 </body>
 </html>

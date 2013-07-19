@@ -1,5 +1,5 @@
 from webtest import TestApp
-from pinhole.common.app import db, application
+from pinhole.common.app import db, app
 
 
 class BaseTest(object):
@@ -10,7 +10,7 @@ class BaseTest(object):
             pass
 
         db.create_all()
-        self.app = TestApp(application())
+        self.app = TestApp(app)
 
     def tearDown(self):
         db.drop_all()

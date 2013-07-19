@@ -9,12 +9,18 @@ from flask.ext import restful
 from flask.ext.restful import abort, marshal_with, fields, marshal
 from flask.ext.login import login_required, current_user
 from pinhole.common import models
-from pinhole.common.app import api, db
+from pinhole.common.app import db, app
+from flask.ext.restful import Api
 from pinhole.common.s3 import S3Adapter
 from pinhole.tasks.photos import ProcessUploadedPhoto
 from .params import (photo_fields, photo_parser, photolist_parser,
-                     uploaded_photo_fields, uploaded_photos_fields)
+                     uploaded_photo_fields, uploaded_photos_fields,
+                     users_fields, user_fields, user_parser, photos_fields,
+                     foto_fields)
 
+
+# api setup
+api = Api(app, prefix="/api/v1")
 
 RE_OP = re.compile("^(.*)__(lt|le|eq|ne|ge|gt)$")
 logger = logging.getLogger(__name__)
@@ -22,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 class Photo(restful.Resource):
     @login_required
-    @marshal_with(photo_fields)
+    @marshal_with(foto_fields)
     def get(self, photo_id):
         photos = models.Photo.query.filter_by(id=photo_id,
                                               user_id=current_user.id)
         if photos.count() == 1:
-            return photos.first()
+            return {"photo": photos.first()}
 
         return abort(404, message="Photo {} doesn't exist".format(photo_id))
 
@@ -68,7 +74,7 @@ class PhotoList(restful.Resource):
         return photo
 
     @login_required
-    @marshal_with(photo_fields)
+    @marshal_with(photos_fields)
     def get(self):
         args = photolist_parser.parse_args()
         photos = models.Photo.query.filter_by(user_id=current_user.id)
@@ -88,7 +94,7 @@ class PhotoList(restful.Resource):
         if args["order_by"] in photo_fields:
             photos = photos.order_by(args["order_by"])
 
-        return photos.all()
+        return {"photos": photos.all()}
 
 
 class UploadedPhotos(restful.Resource):
@@ -109,7 +115,7 @@ class UploadedPhotos(restful.Resource):
         db.session.add(o)
         db.session.commit()
 
-        task = ProcessUploadedPhoto().apply_async(args=(o.id, ))
+        task = ProcessUploadedPhoto.delay(o.id)
         logger.debug("Sent %s" % task)
 
         return marshal({"uploaded_photo": o}, uploaded_photo_fields), 200
@@ -135,15 +141,53 @@ class PhotoFile(restful.Resource):
                          add_etags=False)
 
 
+class User(restful.Resource):
+    @login_required
+    @marshal_with(user_fields)
+    def get(self, user_id):
+        if user_id != current_user.id:
+            return abort(404, message="User {} doesn't exist".format(user_id))
+
+        return {"user": current_user}
+
+
+class UserList(restful.Resource):
+    @login_required
+    @marshal_with(users_fields)
+    def get(self):
+        args = user_parser.parse_args()
+
+        username = args["username"]
+        if username and username != current_user.username:
+            return abort(404, message="User {} doesn't exist".format(username))
+
+        return {"users": [current_user]}
+
+
+class Authenticated(restful.Resource):
+    def get(self):
+        authenticated = current_user.is_authenticated()
+        if authenticated:
+            return marshal({"authenticated": authenticated,
+                            "user": current_user},
+                           {"authenticated": fields.Boolean,
+                            "user": user_fields["user"]}), 200
+        else:
+            return marshal({"authenticated": authenticated},
+                           {"authenticated": fields.Boolean}), 200
+
+
 endpoints = [(Photo, '/photos/<int:photo_id>'),
              (PhotoList, "/photos"),
              (UploadedPhotos, "/uploaded_photos"),
              (PhotoFile,
               '/photos/file/<int:photo_id>/<string:size>/<string:fname>'),
+             (User, "/users/<int:user_id>"),
+             (UserList, "/users"),
+             (Authenticated, "/authenticated"),
              ]
 for args in endpoints:
     try:
-        print "adding", args
         api.add_resource(*args)
     except ValueError:
         pass

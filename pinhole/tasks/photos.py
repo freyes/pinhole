@@ -1,22 +1,31 @@
 import os
 from os import path
-from celery import Celery
-from celery.app.task import Task
+#import celery
 from celery.utils.log import get_task_logger
 from boto.s3.key import Key
 from werkzeug.datastructures import FileStorage
-from pinhole.common.app import db, app
+from pinhole.common.app import celery, db, app
 from pinhole.common import models, s3
 from pinhole.common.utils import mkdtemp
 
+#from pinhole.common.extensions import celery, db, app
+from celery.signals import task_postrun
+
 
 logger = get_task_logger(__name__)
-celery = Celery('photos')
+
+
+@task_postrun.connect
+def close_session(*args, **kwargs):
+    # Flask SQLAlchemy will automatically create new sessions for you from
+    # a scoped session factory, given that we are maintaining the same app
+    # context, this ensures tasks have a fresh session (e.g. session errors
+    # won't propagate across tasks)
+    db.session.remove()
 
 
 @celery.task
-class ProcessUploadedPhoto(Task):
-    name = "process_uploaded_photo"
+class ProcessUploadedPhoto(celery.Task):
 
     def run(self, up_photo_id, force=False):
         uploaded_photo = models.UploadedPhoto.get_by(id=up_photo_id)

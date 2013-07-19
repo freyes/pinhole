@@ -7,7 +7,7 @@ from nose.tools import (assert_equal, assert_in, assert_is_instance,
 from boto.s3.key import Key
 
 from pinhole.common import models
-from pinhole.common.app import db, app
+from pinhole.common.extensions import db, app
 from pinhole.common import s3
 from .base import BaseTest
 from ..photos import ProcessUploadedPhoto
@@ -56,7 +56,7 @@ class TestProcessUploadedPhoto(BaseTest):
         db.session.add(self.up)
         db.session.commit()
 
-        t = ProcessUploadedPhoto().apply(args=(self.up.id, ))
+        t = ProcessUploadedPhoto.delay(self.up.id)
 
         assert_equal(t.ready(), True)
         r = t.result
@@ -67,7 +67,7 @@ class TestProcessUploadedPhoto(BaseTest):
         assert_equal(r["message"], "The %s was already processed" % self.up)
 
     def test_ok(self):
-        t = ProcessUploadedPhoto().apply(args=(self.up.id, ))
+        t = ProcessUploadedPhoto.delay(self.up.id)
         assert_equal(t.ready(), True)
         assert_equal(t.state, "SUCCESS", t.traceback)
         r = t.result
@@ -75,4 +75,5 @@ class TestProcessUploadedPhoto(BaseTest):
         assert_in("photo_id", r)
         photo = models.Photo.get_by(id=r["photo_id"])
         assert_is_not(photo, None)
-        assert_equal(photo.user, self.u)
+        assert_is_not(photo.user, None)
+        assert_equal(photo.user.id, self.u.id)
