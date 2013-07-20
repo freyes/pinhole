@@ -19,4 +19,8 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
     ],
+    entry_points = """
+    [console_scripts]
+    pinhole-syncdb = pinhole.bin.sync_db:main
+    """
 )
