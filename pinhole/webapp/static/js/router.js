@@ -5,12 +5,22 @@ App.Router.map(function() {
     this.resource("photos", function() {
         this.route("view", {path: "/:photo_id"});
     });
+    this.route("loggedOut", {path: "/loggedOut"});
+    this.route("login", {path: "/login"});
+    this.route("password_reset", {path: "/password_reset"});
+    this.route("register_account", {path: "/register"});
 });
 
 App.IndexRoute = Ember.Route.extend({
-  setupController: function(controller){
-      controller.set("content", App.Photo.find());
-  }
+    setupController: function(controller){
+        controller.set("content", App.Photo.find());
+    },
+    redirect: function() {
+        var authenticated = isAuthenticated();
+        if (!authenticated) {
+            this.transitionTo("login");
+        }
+    }
 });
 
 App.UploadRoute = Ember.Route.extend({

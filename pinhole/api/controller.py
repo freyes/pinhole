@@ -7,7 +7,7 @@ from sqlalchemy.sql.expression import and_
 from flask import request, make_response, send_file
 from flask.ext import restful
 from flask.ext.restful import abort, marshal_with, fields, marshal
-from flask.ext.login import login_required, current_user
+from flask.ext.login import login_required, current_user, login_user
 from pinhole.common import models
 from pinhole.common.app import db, app
 from flask.ext.restful import Api
@@ -17,6 +17,7 @@ from .params import (photo_fields, photo_parser, photolist_parser,
                      uploaded_photo_fields, uploaded_photos_fields,
                      users_fields, user_fields, user_parser, photos_fields,
                      foto_fields)
+from . import params
 
 
 # api setup
@@ -175,6 +176,22 @@ class Authenticated(restful.Resource):
         else:
             return marshal({"authenticated": authenticated},
                            {"authenticated": fields.Boolean}), 200
+
+    def post(self):
+        args = params.login_parser.parse_args()
+
+        user = models.User.get_by(username=args["username"])
+
+        if not user or not user.check_password(args["password"]):
+            return abort(404,
+                         message="Wrong Username and password combination.")
+
+        if login_user(user, remember=False):
+            return marshal({"authenticated": True, "user": user},
+                           {"authenticated": fields.Boolean,
+                            "user": user_fields["user"]}), 200
+        else:
+            return abort(404)
 
 
 endpoints = [(Photo, '/photos/<int:photo_id>'),

@@ -79,3 +79,7 @@ user_fields = {"user": fields.Nested(_user_fields)}
 users_fields = {"users": fields.List(fields.Nested(_user_fields))}
 user_parser = reqparse.RequestParser()
 user_parser.add_argument('username', type=str)
+
+login_parser = reqparse.RequestParser()
+login_parser.add_argument('username', type=str, required=True)
+login_parser.add_argument('password', type=str, required=True)

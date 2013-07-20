@@ -24,7 +24,7 @@
   <script src="/media/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 
   <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="/media/css/main.css">
+  <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
@@ -98,7 +98,7 @@
         </div>
       {{else}}
         <div class="span12">
-          <p>Sorry, you don't have photos, you should upload a few to start using pinhole.</p>
+          <p>Sorry, you don't have photos, you should {{#linkTo 'upload'}}upload{{/linkTo}} a few to start using pinhole.</p>
         </div>
       {{/each}}
     </div>
@@ -145,7 +145,7 @@
     </div>
     </script>
 
-    <script type="text/x-handlebars" data-template-name="logged-out">
+    <script type="text/x-handlebars" data-template-name="loggedOut">
       <h1>Logged Out</h1>
       <hr /><br />
       <span>Login with "test/test"</span><br /><br />
@@ -159,14 +159,40 @@
        <br /><button {{action "authenticate" target="App.stateManager"}}>Login</button>
        </script>
 
-<!-- Logged In View -->
-<script type="text/x-handlebars" data-template-name="logged-in">
-  <h1>Logged In</h1>
-  
-  <hr /><br />
-  <span>Welcome to your app!</span><br /><br />
-  <button {{action "logout" target="App.stateManager"}}>Logout</button>
-</script>
+    <!-- login view -->
+    <script type="text/x-handlebars" data-template-name="login">
+      <div class="row">
+        <div class="span4"></div>
+        <div class="span4 login-form text-center">
+          <h2>Login</h2>
+          <form onSubmit="return do_login(this);">
+            <div id="div_login_alert" class="alert error hide"></div>
+            <fieldset>
+              <div class="clearfix">
+                <input type="text" id="username" name="username" placeholder="Username">
+              </div>
+              <div class="clearfix">
+                <input type="password" id="password" name="password" placeholder="Password">
+              </div>
+              <button class="btn btn-primary btn-sign-in" id="btn_submit" type="submit">Sign in</button>
+              {{#linkTo 'password_reset'}}Forgot your password?{{/linkTo}}
+            </fieldset>
+          </form>
+           No account? {{#linkTo 'register_account'}}Register now!{{/linkTo}}
+        </div>
+        <div class="span4"></div>
+      </div>
+    </script>
+
+    <!-- password reset view -->
+    <script type="text/x-handlebars" data-template-name="password_reset">
+      <h1>password reset</h1>
+    </script>
+
+    <!-- register new account view -->
+    <script type="text/x-handlebars" data-template-name="register_account">
+      <h1>register</h1>
+    </script>
     <hr>
 
   <script type="text/javascript" src="js/vendor/jquery-1.9.1.min.js"></script>

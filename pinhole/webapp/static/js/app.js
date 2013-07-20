@@ -54,3 +54,29 @@ function isAuthenticated() {
     else
         return null;
 };
+
+
+function do_login(frm) {
+    console.log(frm);
+    $(frm).addClass("disabled");
+    $(frm).find("#btn_submit").addClass("disabled").html('<i class="icon-spinner icon-large"></i>');
+    var username = $(frm).find("#username").val();
+    var password = $(frm).find("#password").val();
+    
+    $.ajax("/api/v1/authenticated",
+           {type: "POST",
+            data: {username: username, password: password},
+            success: function(data, textStatus, jqXHR) {
+                console.log(data);
+                App.__container__.lookup("controller:index").transitionToRoute("index");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+                var response = $.parseJSON(jqXHR.responseText);
+                $(frm).find("#btn_submit").removeClass("disabled").html("Sign in");
+                $("#div_login_alert").html(response["message"]).removeClass("hide");
+            }
+           });
+
+    return false;
+};
