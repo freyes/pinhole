@@ -44,6 +44,22 @@ class TestPhotoController(BaseTest):
         db.session.commit()
         self.photo_id = self.photo.id
 
+    def test_delete_not_found(self):
+        self.login("john", "doe")
+        photo_id = 45834345
+        res = self.app.delete("/api/v1/photos/%d" % photo_id,
+                              expect_errors=True)
+        assert_equal(res.status_int, 404)
+        assert_is_instance(res.json, dict)
+        assert_in("message", res.json)
+        assert_equal(res.json["message"],
+                     "Photo {} doesn't exist".format(photo_id))
+
+    def test_delete(self):
+        self.login("john", "doe")
+        res = self.app.delete("/api/v1/photos/%d" % self.photo_id)
+        assert_equal(res.status_int, 200)
+
     def test_get(self):
         self.login("john", "doe")
         res = self.app.get("/api/v1/photos/%d" % self.photo_id)
