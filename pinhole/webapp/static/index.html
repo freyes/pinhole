@@ -23,7 +23,7 @@
 
   <script src="/media/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 
-  <link rel="stylesheet" href="css/normalize.css">
+  <!-- <link rel="stylesheet" href="css/normalize.css"> -->
   <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
@@ -191,16 +191,74 @@
 
     <!-- register new account view -->
     <script type="text/x-handlebars" data-template-name="register_account">
-      <h1>register</h1>
+      <div class="row">
+        <div class="span4"></div>
+        <div class="span4">
+          <!-- <form id="frm_signup" action="" method="POST"> -->
+          {{#view App.RegisterFormView method="POST"}}
+            <fieldset>
+              <legend>Sign up</legend>
+
+              <div class="control-group">
+                <label class="control-label" for="username">Username</label>
+                <div class="controls">
+                  <input type="text" name="username" id="username" placeholder="Username">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="email">Email</label>
+                <div class="controls">
+                  <input type="email" name="email" id="email" placeholder="Email">
+                </div>
+              </div>
+  
+              <div class="control-group">
+                <label class="control-label" for="password_1">Password</label>
+                <div class="controls">
+                  <input type="password" name="password_1" id="password_1" placeholder="Password">
+                </div>
+              </div>
+  
+              <div class="control-group">
+                <label class="control-label" for="password_2">Confirm Password</label>
+                <div class="controls">
+                  <input type="password" name="password_2" placeholder="Confirm Password">
+                </div>
+              </div>
+  
+              <div class="control-group">
+                <label class="checkbox">
+                    <input type="checkbox" name="tos" required> I have read and agree to the Terms of Use
+                </label>
+              </div>
+
+              <div class="control-group">
+                <input type="submit" class="btn btn-primary" value="Submit" >
+              </div>
+            </fieldset>
+          {{/view}}
+        </div>
+        <div class="span4"></div>
+      </div>
     </script>
     <hr>
 
+  <!-- third party -->
+  <script type="text/javascript" src="js/vendor/moment.js"></script>
   <script type="text/javascript" src="js/vendor/jquery-1.9.1.min.js"></script>
+  <script type="text/javascript" src="js/vendor/jquery.validate.js"></script>
   <script type="text/javascript" src="/media/js/vendor/bootstrap.min.js"></script>
   <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
   <script type="text/javascript" src="js/vendor/handlebars-1.0.0-rc.4.js"></script>
   <script type="text/javascript" src="js/vendor/ember-1.0.0-rc.6.js"></script>
   <script type="text/javascript" src="js/vendor/ember-data.js"></script>
+
+  <!-- mock ajax -->
+  <!--  <script type="text/javascript" src="js/vendor/jquery.mockjax.js"></script>  -->
+  <!--  <script type="text/javascript" src="js/mockjax.js"></script>  -->
+
+  <!-- my js -->
   <script type="text/javascript" src="js/app.js"></script>
   <script type="text/javascript" src="js/router.js"></script>
   <script type="text/javascript" src="js/models.js"></script>

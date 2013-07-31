@@ -77,9 +77,20 @@ _user_fields = {
 
 user_fields = {"user": fields.Nested(_user_fields)}
 users_fields = {"users": fields.List(fields.Nested(_user_fields))}
+
 user_parser = reqparse.RequestParser()
 user_parser.add_argument('username', type=str)
+
+check_user_parser = reqparse.RequestParser()
+check_user_parser.add_argument('username', type=str)
+check_user_parser.add_argument('email', type=str)
+
 
 login_parser = reqparse.RequestParser()
 login_parser.add_argument('username', type=str, required=True)
 login_parser.add_argument('password', type=str, required=True)
+
+register_user = reqparse.RequestParser()
+register_user.add_argument('username', type=str, required=True)
+register_user.add_argument('password', type=str, required=True)
+register_user.add_argument('email', type=str, required=True)

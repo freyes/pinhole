@@ -7,5 +7,23 @@
 }
 
 .error {
-    color: red;
+    color: #B94A48;
 }
+
+div small.error {
+  color: #B94A48; /* color to match Bootstraps error class */
+}
+
+.input-valid {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  text-indent: -9999px;
+}
+
+/* label.error { */
+/*   font-weight: bold; */
+/*   color: red; */
+/*   padding: 2px 8px; */
+/*   margin-top: 2px; */
+/* } */

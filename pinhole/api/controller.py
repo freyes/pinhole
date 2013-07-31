@@ -3,7 +3,7 @@ import re
 import operator
 import logging
 from datetime import datetime
-from sqlalchemy.sql.expression import and_
+from sqlalchemy.sql.expression import and_, or_
 from flask import request, make_response, send_file
 from flask.ext import restful
 from flask.ext.restful import abort, marshal_with, fields, marshal
@@ -164,6 +164,45 @@ class UserList(restful.Resource):
 
         return {"users": [current_user]}
 
+    def patch(self):
+        args = params.check_user_parser.parse_args()
+
+        if not args.get("email") and not args.get("username"):
+            return abort(404, message="Provide email or username")
+
+        filters = or_()
+        if args.get("email"):
+            filters.append(models.User.email == args["email"])
+
+        if args.get("username"):
+            filters.append(models.User.username == args["username"])
+
+        users = models.User.query.filter(filters)
+
+        if users.count() == 0:
+            return "true", 200
+        else:
+            return "false", 200
+
+    @marshal_with(params.user_fields)
+    def post(self):
+        args = params.register_user.parse_args()
+
+        filters = or_()
+        filters.append(models.User.email == args["email"])
+        filters.append(models.User.username == args["username"])
+        users = models.User.query.filter(filters)
+
+        if users.count() > 0:
+            return abort(400, message="Username/email already in use")
+
+        user = models.User(args["username"], args["email"])
+        user.set_password(args["password"], commit=False)
+        db.session.add(user)
+        db.session.commit()
+
+        return {"user": user}
+
 
 class Authenticated(restful.Resource):
     def get(self):
@@ -191,7 +230,7 @@ class Authenticated(restful.Resource):
                            {"authenticated": fields.Boolean,
                             "user": user_fields["user"]}), 200
         else:
-            return abort(404)
+            return abort(404, message="Invalid username/password combination")
 
 
 endpoints = [(Photo, '/photos/<int:photo_id>'),

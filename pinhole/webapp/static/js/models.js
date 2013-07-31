@@ -41,3 +41,7 @@ App.Photo = DS.Model.extend({
         return "/api/v1/photos/file/" + this.get("id") + "/large_1024/f.jpg";
     }.property()
 });
+
+App.NewUser = Ember.Object.extend({
+    
+});

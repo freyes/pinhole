@@ -62,7 +62,7 @@ function do_login(frm) {
     $(frm).find("#btn_submit").addClass("disabled").html('<i class="icon-spinner icon-large"></i>');
     var username = $(frm).find("#username").val();
     var password = $(frm).find("#password").val();
-    
+
     $.ajax("/api/v1/authenticated",
            {type: "POST",
             data: {username: username, password: password},
@@ -80,3 +80,36 @@ function do_login(frm) {
 
     return false;
 };
+
+jQuery.validator.setDefaults({
+    errorPlacement: function(error, element) {
+        var e;
+        if(element.parent().hasClass('input-prepend') || element.parent().hasClass('input-append') || element.parent().hasClass('checkbox')) {
+            e = element.parent();
+        } else {
+            e = element;
+        }
+        if (e.next().length > 0)
+            e.next().replaceWith(error);
+        else
+            error.insertAfter(e);
+    },
+    highlight: function(element) {
+        console.log("Adding error");
+        console.log($(element).closest('.control-group'));
+        $(element).closest('.control-group').removeClass("success").addClass('error');
+    },
+    success: function(element) {
+        $(element).removeClass("error").closest('.control-group').removeClass('error').addClass("success");
+        if (!$(element).prev().hasClass("checkbox"))
+            $(element).addClass("icon-ok");
+    }
+});
+
+Ember.Handlebars.registerBoundHelper('date', function(date) {
+  return moment(date).fromNow();
+});
+
+Ember.Handlebars.registerBoundHelper('datetime', function(datetime) {
+  return moment(datetime).fromNow();
+});
