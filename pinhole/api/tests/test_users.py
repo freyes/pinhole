@@ -55,22 +55,22 @@ class TestRegister(BaseTest):
 
     def test_check_username_used(self):
         params = OrderedDict([("username", "john")])
-        res = self.app.patch("/api/v1/users", params)
+        res = self.app.post("/api/v1/users_available", params)
         assert_equal(res.body, '"false"\n')
 
     def test_check_username_is_available(self):
         params = OrderedDict([("username", "asdf")])
-        res = self.app.patch("/api/v1/users", params)
+        res = self.app.post("/api/v1/users_available", params)
         assert_equal(res.body, '"true"\n')
 
     def test_check_email_used(self):
         params = OrderedDict([("email", "john@example.com")])
-        res = self.app.patch("/api/v1/users", params)
+        res = self.app.post("/api/v1/users_available", params)
         assert_equal(res.body, '"false"\n')
 
     def test_check_email_is_available(self):
         params = OrderedDict([("email", "john@example.cl")])
-        res = self.app.patch("/api/v1/users", params)
+        res = self.app.post("/api/v1/users_available", params)
         assert_equal(res.body, '"true"\n')
 
     def test_login(self):

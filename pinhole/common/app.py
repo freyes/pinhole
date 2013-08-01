@@ -44,3 +44,8 @@ def application(environ=None, start_response=None):
 
 
 application()
+
+try:
+    db.create_all()
+except:
+    pass

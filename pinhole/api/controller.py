@@ -164,26 +164,6 @@ class UserList(restful.Resource):
 
         return {"users": [current_user]}
 
-    def patch(self):
-        args = params.check_user_parser.parse_args()
-
-        if not args.get("email") and not args.get("username"):
-            return abort(404, message="Provide email or username")
-
-        filters = or_()
-        if args.get("email"):
-            filters.append(models.User.email == args["email"])
-
-        if args.get("username"):
-            filters.append(models.User.username == args["username"])
-
-        users = models.User.query.filter(filters)
-
-        if users.count() == 0:
-            return "true", 200
-        else:
-            return "false", 200
-
     @marshal_with(params.user_fields)
     def post(self):
         args = params.register_user.parse_args()
@@ -202,6 +182,28 @@ class UserList(restful.Resource):
         db.session.commit()
 
         return {"user": user}
+
+
+class UsersAvailable(restful.Resource):
+    def post(self):
+        args = params.check_user_parser.parse_args()
+
+        if not args.get("email") and not args.get("username"):
+            return abort(404, message="Provide email or username")
+
+        filters = or_()
+        if args.get("email"):
+            filters.append(models.User.email == args["email"])
+
+        if args.get("username"):
+            filters.append(models.User.username == args["username"])
+
+        users = models.User.query.filter(filters)
+
+        if users.count() == 0:
+            return "true", 200
+        else:
+            return "false", 200
 
 
 class Authenticated(restful.Resource):
@@ -240,6 +242,7 @@ endpoints = [(Photo, '/photos/<int:photo_id>'),
               '/photos/file/<int:photo_id>/<string:size>/<string:fname>'),
              (User, "/users/<int:user_id>"),
              (UserList, "/users"),
+             (UsersAvailable, "/users_available"),
              (Authenticated, "/authenticated"),
              ]
 for args in endpoints:

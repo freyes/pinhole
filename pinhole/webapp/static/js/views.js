@@ -30,16 +30,20 @@ App.RegisterFormView = Ember.View.extend({
                     required: true,
                     minlength: 4,
                     remote: {
-                        url: "/api/v1/users",
-                        type: "options"
+                        url: "/api/v1/users_available",
+                        type: "post",
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                        cache: false
                     }
                 },
                 email: {
                     required: true,
                     email: true,
                     remote: {
-                        url: "/api/v1/users",
-                        type: "options"
+                        url: "/api/v1/users_available",
+                        type: "post",
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                        cache: false
                     }
                 },
                 password_1: {
@@ -47,7 +51,9 @@ App.RegisterFormView = Ember.View.extend({
                     minlength: 8
                 },
                 password_2: {
-                    equalTo: "#password_1"
+                    equalTo: "#password_1",
+                    minlength: 8,
+                    required: true
                 },
                 tos: {
                     required: true
@@ -57,16 +63,18 @@ App.RegisterFormView = Ember.View.extend({
     },
     submit: function(event) {
         var frm = $("#" + this.elementId);
+        frm.append("<i class='icon-spinner'></i>");
 
-        if (!frm.valid())
+        if (!frm.valid()) {
+            console.log("form is not in a valid state");
             return false;
+        }
 
         // TODO: lock the form while the call is being processed
         try {
             var new_user = {username: frm.find("input#username").val(),
                             email: frm.find("input#email").val(),
                             password: frm.find("input#password_1").val()};
-
             $.ajax({
                 url: "/api/v1/users",
                 dataType: "json",
@@ -74,9 +82,14 @@ App.RegisterFormView = Ember.View.extend({
                 data: new_user,
                 success: function(data) {
                     console.log(data);
+                    frm.append("account created");
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     console.log(errorThrown);
+                    frm.append(errorThrown);
+                },
+                complete: function() {
+                    frm.addClass("register-done");
                 }
             });
 
