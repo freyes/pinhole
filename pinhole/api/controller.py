@@ -4,14 +4,13 @@ import operator
 import logging
 from datetime import datetime
 from sqlalchemy.sql.expression import and_, or_
-from flask import request, make_response, send_file
+from flask import request, send_file
 from flask.ext import restful
 from flask.ext.restful import abort, marshal_with, fields, marshal
 from flask.ext.login import login_required, current_user, login_user
 from pinhole.common import models
 from pinhole.common.app import db, app
 from flask.ext.restful import Api
-from pinhole.common.s3 import S3Adapter
 from pinhole.tasks.photos import ProcessUploadedPhoto
 from .params import (photo_fields, photo_parser, photolist_parser,
                      uploaded_photo_fields, uploaded_photos_fields,

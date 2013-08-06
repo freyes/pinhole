@@ -1,6 +1,4 @@
 from __future__ import absolute_import
-import os
-import boto
 from os import path
 from nose.tools import (assert_equal, assert_in, assert_is_instance,
                         assert_is_not)

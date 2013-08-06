@@ -6,7 +6,8 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 from werkzeug.datastructures import FileStorage
 from flask.ext.restful import marshal
-from nose.tools import assert_equal, assert_in, assert_is_instance, assert_true
+from nose.tools import (assert_equal, assert_in, assert_is_instance,
+                        assert_true, assert_is_not_equal)
 from webtest import TestApp
 from webtest.forms import Upload
 from pinhole.common import models
@@ -78,6 +79,7 @@ class TestPhotoController(BaseTest):
         url = "/api/v1/photos/file/%d/thumbnail/4843655940_d8dd79d602_o.jpg" \
               % self.photo_id
         res = self.app.get(url)
+        assert_is_not_equal(res, None)
         # TODO: do the asserts
 
     def test_get_someone_else_photo(self):

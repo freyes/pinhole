@@ -2,8 +2,6 @@ from __future__ import absolute_import
 
 from os import path
 from importlib import import_module
-from flask import Flask
-from flask.ext.login import LoginManager
 
 #from .models import db
 from .extensions import celery, db, app, login_manager

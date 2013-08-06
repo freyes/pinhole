@@ -1,4 +1,4 @@
-from flask import session, redirect, url_for, request, render_template, flash
+from flask import redirect, url_for, request, render_template, flash
 from flask.ext.login import (login_required, login_user, logout_user,
                              confirm_login)
 from pinhole.common.app import app, login_manager, db

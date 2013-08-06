@@ -1,19 +1,19 @@
 from __future__ import absolute_import
 import uuid
 import warnings
+import logging
 from tempfile import TemporaryFile
 from datetime import datetime
 from urlparse import urlparse
 from os import path
 from PIL import Image, ExifTags
-from flask.ext.sqlalchemy import SQLAlchemy
 from boto.s3.key import Key
 from .auth import check_password, make_password
 from .s3 import S3Adapter
 from .exif import exif_transform
-
-#db = SQLAlchemy(session_options={"expire_on_commit": False})
 from .extensions import db
+
+
 exif_tags = ExifTags.TAGS
 exif_tags[316] = "HostComputer"
 
@@ -34,6 +34,13 @@ class BaseModel(object):
             return getattr(self, key)
         else:
             raise KeyError(key)
+
+    @property
+    def logger(self):
+        if not hasattr(self, "_logger") or not self._logger:
+            self._logger = logging.getLogger(self.__class__.__name__)
+
+        return self._logger
 
     def save(self):
         db.session.add(self)
@@ -362,7 +369,7 @@ class Photo(db.Model, BaseModel):
         info = i._getexif()
 
         if not info:
-            logger.info("Exif info not found in {}".format(i))
+            self.logger.info("Exif info not found in {}".format(i))
             return ret
 
         for tag, value in info.items():

@@ -1,5 +1,4 @@
 from flask import render_template
-from flask.ext.login import login_required
 from pinhole.common.app import app
 
 

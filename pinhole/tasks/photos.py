@@ -1,8 +1,6 @@
-import os
 from os import path
 #import celery
 from celery.utils.log import get_task_logger
-from boto.s3.key import Key
 from werkzeug.datastructures import FileStorage
 from pinhole.common.app import celery, db, app
 from pinhole.common import models, s3
