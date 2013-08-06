@@ -11,3 +11,5 @@ docs/_build
 coverage.xml
 xunit.xml
 .downloadcache
+access.log
+tests/pinhole.db
