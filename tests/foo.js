@@ -11,6 +11,15 @@ console.log("Using port " + fport);
 
 var baseurl = "http://localhost:" + fport;
 
+var casper = require('casper').create({
+    logLevel: "debug"
+});
+
+casper.on('remote.message', function(message) {
+    console.log(message);
+});
+
+
 var listening = server.listen(port, function (request, response) {
     //console.log("Requested "+request.url);
     
@@ -62,6 +71,12 @@ casper.test.begin("Test register", 1, function(test) {
         this.clickLabel("Register now!", "a");
     });
 
+    casper.waitFor(function() {
+        return this.evaluate(function() {
+            return ($("form.register").length > 0);
+        });
+    });
+
     casper.then(function() {
         this.fill("form.register", {
             username: "foobar",
@@ -71,37 +86,56 @@ casper.test.begin("Test register", 1, function(test) {
             tos: true
         }, false);
     });
+
     casper.waitFor(function check() {
         return this.evaluate(function() {
             return $("form.register").valid();
         });
     }, function then() {
+        this.echo("The form is valid, we are going to submit it");
         this.echo("Capturing screenshot 0");
         this.capture("../pinhole/webapp/static/foo0.png");
-        this.evaluate(function() {
-            $('form.register').submit();
-        });
-        this.capture("../pinhole/webapp/static/foo01.png");
-    }).waitFor(function check() {
-        this.echo("waitfor");
-        this.capture("../pinhole/webapp/static/foo02.png");
+        this.click({type: "xpath", path: "//*[@value='Submit']"});
+    });
+
+    casper.waitFor(function check() {
         return this.evaluate(function() {
-            return (document.body.innerText.indexOf("account created") != -1);
-            //return $("form.register").hasClass("done");
+            return (document.body.innerText.indexOf("Welcome to Pinhole") != -1);
+            //return /\/register_done$/.test(String(window.location));
         });
     }, function then() {
-        this.echo("Capturing screenshot 1");
-        this.capture("../pinhole/webapp/static/foo1.png");
         this.evaluateOrDie(function() {
-            return (document.body.innerText.indexOf("account created") != -1);
-        }, "not found 'account created'");
+            return (document.body.innerText.indexOf("Welcome to Pinhole") != -1);
+        }, "not found 'Welcome to pinhole'");
     }, function timeout() {
         this.capture("../pinhole/webapp/static/foo2.png");
-        this.echo("form didn't get 'done' class");
+        this.evaluate(function() {
+            console.log(window.location);
+        });
+        this.echo("browser wasn't redirected to '/register_done'");
         casper.exit(1);
-    }, 15000);
+    }, 5000);
+
+    casper.then(function() {
+        this.evaluate(function() {
+            $("a.btn-success").click();
+        });
+    });
+
+    casper.waitFor(function check() {
+        return this.evaluate(function (){
+            return ($('*:contains("Hi, foobar")').length > 0);
+        });
+    }, function then() {
+        this.echo("welcome message found");
+    }, function timeout() {
+        this.capture("../pinhole/webapp/static/foo3.png");
+        this.echo("index message not found");
+        casper.exit(1);
+    }, 5000);
 
   casper.run(function() {
       test.done();
+      this.echo("Done.").exit(0);
   });
 });

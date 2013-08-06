@@ -7,8 +7,10 @@ App.Router.map(function() {
     });
     this.route("loggedOut", {path: "/loggedOut"});
     this.route("login", {path: "/login"});
+    this.route("logout", {path: "/logout"});
     this.route("password_reset", {path: "/password_reset"});
     this.route("register_account", {path: "/register"});
+    this.route("register_account_done", {path: "/register_done"});
 });
 
 App.IndexRoute = Ember.Route.extend({
@@ -36,10 +38,6 @@ App.UserRoute = Ember.Route.extend({
 });
 
 App.PhotosViewRoute = Ember.Route.extend({
-    // renderTemplate: function() {
-    //     debugger;
-    //     this.render("photos.view");
-    // },
     model: function(params) {
         return App.Photo.find(params.photo_id);
     }

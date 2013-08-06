@@ -3,7 +3,7 @@ App.ApplicationController = Ember.Controller.extend({
         return App.User.find();
     }
 });
-grrr = null;
+
 App.CurrentUserController = Ember.ObjectController.extend({
     isSignedIn: function() {
         return (this.get("content") != null);
@@ -11,27 +11,40 @@ App.CurrentUserController = Ember.ObjectController.extend({
 });
 
 // Create the login controller
-App.loginController = Ember.Object.create({
+App.LoginController = Ember.ObjectController.extend({
     username: '',
     password: '',
     isError: false,
-
+    errorMessage: "",
     tryLogin: function() {
-        // Simulate server delay
-        Ember.run.later(this, this._serverLogin, 100);
-    },
-    _serverLogin: function() {
-        // Normally this would go to the server. Simulate that.
-        if(this.get('username') === "test" &&
-           this.get('password') === "test") {
-            this.set('isError', false);
-            this.set('username', '');
-            this.set('password', '');
-            App.stateManager.send('loginSuccess');
-        } else {
-            this.set('isError', true);
-            App.stateManager.send('loginFail');
-        }
+        var controller = this;
+
+        $.ajax("/api/v1/authenticated",
+               {type: "POST",
+                data: {username: this.get("username"), 
+                       password: this.get("password")},
+                success: function(data, textStatus, jqXHR) {
+                    console.log(data);
+                    controller.set("isError", false);
+                    controller.set("errorMessage", "");
+
+                    var store = controller.get("store");
+                    var object = store.load(App.User, data["user"]);
+                    var user = App.User.find(object.id);
+                    var container = controller.get("container");
+                    container.lookup('controller:currentUser').set('content', user);
+                    container.typeInjection('controller', 'currentUser', 'controller:currentUser');
+
+                    controller.transitionToRoute("index");
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+
+                    var response = $.parseJSON(jqXHR.responseText);
+                    this.set("errorMessage", response["message"]);
+                    this.set('isError', true);
+                }
+               });
     }
 });
 
@@ -41,8 +54,8 @@ Ember.Application.initializer({
     store = container.lookup('store:main');
     var authenticated = isAuthenticated();
     if (authenticated) {
-        object = store.load(App.User, authenticated["user"]);
-        user = App.User.find(object.id);
+        var object = store.load(App.User, authenticated["user"]);
+        var user = App.User.find(object.id);
         controller = container.lookup('controller:currentUser').set('content', user);
         container.typeInjection('controller', 'currentUser', 'controller:currentUser');
     }
@@ -52,4 +65,17 @@ Ember.Application.initializer({
 App.IndexController = Ember.ArrayController.extend({
     sortAscending: true,
     sortProperties: ['id']
+});
+
+
+App.RegisterAccountController = Ember.ObjectController.extend({
+    needs: ["register_account_done"],
+    content: {}
+});
+
+App.RegisterAccountDoneController = Ember.ObjectController.extend({
+    needs: ["register_account", "login"],
+    account_created: function() {
+        return this.get("controllers.register_account").get("account_created");
+    }.property("controllers.register_account.account_created")
 });

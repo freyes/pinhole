@@ -44,30 +44,16 @@
               {{#linkTo "index" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>Home</i></a>{{/linkTo}}
               {{#linkTo "upload" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-upload icon-large"></i> Upload</a>{{/linkTo}}
               {{#linkTo "about" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>About</i></a>{{/linkTo}}
+            </ul>
+            {{#view App.UserWidgetView}}
               <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> {{currentUser.username}} <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li class="nav-header">Nav header</li>
-                  <li><a href="#">Separated link</a></li>
-                  <li><a href="#">One more separated link</a></li>
+                  <li><a href="#">Messages</a></li>
+                  <li>{{#linkTo "logout"}}Logout{{/linkTo}}</a>
                 </ul>
               </li>
-            </ul>
-            {{#if currentUser.isSignedIn }}
-               <ul class="nav pull-right">
-                 <li>{{currentUser.username}}</li>
-               </ul>
-            {{else}}
-              <form id="frm_login" method="POST" class="navbar-form pull-right">
-                <input class="span2" name="username" type="text" placeholder="Username">
-                <input class="span2" name="password" type="password" placeholder="Password">
-                <button type="submit" class="btn">Sign in</button>
-              </form>
-            {{/if}}
+            {{/view}}
           </div><!--/.nav-collapse -->
         </div>
       </div>
@@ -145,6 +131,38 @@
     </div>
     </script>
 
+    <!-- login view -->
+    <script type="text/x-handlebars" data-template-name="login">
+      <div class="row">
+        <div class="span4"></div>
+        <div class="span4 login-form text-center">
+          <h2>Login</h2>
+          {{#view App.LoginFormView  method="POST"}}
+            {{# if isError }}
+              <div id="div_login_alert" class="alert error">{{errorMessage}}</div>
+            {{/if}}
+            <fieldset>
+              <div class="clearfix">
+                {{view Ember.TextField valueBinding="username" placeholder="username"}}
+              </div>
+              <div class="clearfix">
+                {{view Ember.TextField valueBinding="password" placeholder="password" type="password"}}
+              </div>
+              <button class="btn btn-primary btn-sign-in" id="btn_submit" type="submit">Sign in</button>
+              {{#linkTo 'password_reset'}}Forgot your password?{{/linkTo}}
+            </fieldset>
+          {{/view}}
+           No account? {{#linkTo 'register_account'}}Register now!{{/linkTo}}
+        </div>
+        <div class="span4"></div>
+      </div>
+    </script>
+
+    <!-- logout -->
+    <script type="text/x-handlebars" data-template-name="logout">
+      logout
+    </script>
+
     <script type="text/x-handlebars" data-template-name="loggedOut">
       <h1>Logged Out</h1>
       <hr /><br />
@@ -158,31 +176,6 @@
     
        <br /><button {{action "authenticate" target="App.stateManager"}}>Login</button>
        </script>
-
-    <!-- login view -->
-    <script type="text/x-handlebars" data-template-name="login">
-      <div class="row">
-        <div class="span4"></div>
-        <div class="span4 login-form text-center">
-          <h2>Login</h2>
-          <form onSubmit="return do_login(this);">
-            <div id="div_login_alert" class="alert error hide"></div>
-            <fieldset>
-              <div class="clearfix">
-                <input type="text" id="username" name="username" placeholder="Username">
-              </div>
-              <div class="clearfix">
-                <input type="password" id="password" name="password" placeholder="Password">
-              </div>
-              <button class="btn btn-primary btn-sign-in" id="btn_submit" type="submit">Sign in</button>
-              {{#linkTo 'password_reset'}}Forgot your password?{{/linkTo}}
-            </fieldset>
-          </form>
-           No account? {{#linkTo 'register_account'}}Register now!{{/linkTo}}
-        </div>
-        <div class="span4"></div>
-      </div>
-    </script>
 
     <!-- password reset view -->
     <script type="text/x-handlebars" data-template-name="password_reset">
@@ -240,6 +233,25 @@
         </div>
         <div class="span4"></div>
       </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="register_account_done">
+      {{# if account_created}}
+      <div class="row">
+         <div class="span12">
+           <h2>Welcome to Pinhole</h2>
+         </div>
+      </div>
+      <div class="row">
+        <div class="span7">
+          <p>Please check you inbox for an email that will confirm your email address.</p>
+        </div>
+        <div class="span5">
+          {{#linkTo "index" tagName="a" classNames="btn btn-success"}}Continue to Pinhole{{/linkTo}}
+        </div>
+      </div>
+      {{else}}
+      <h2>Unauthorized</h2>
+      {{/if}}
     </script>
     <hr>
 

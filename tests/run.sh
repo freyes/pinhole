@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 echo "launching gunicorn"
-gunicorn pinhole.common.app  --access-logfile access.log --log-file error.log --log-level WARN &
+gunicorn pinhole.common.app  --access-logfile access.log --log-file - --log-level error &
 GPID=$!
 
 if [ "x$?" != "x0" ]; then

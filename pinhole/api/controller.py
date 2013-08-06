@@ -181,6 +181,8 @@ class UserList(restful.Resource):
         db.session.add(user)
         db.session.commit()
 
+        login_user(user, remember=False)
+
         return {"user": user}
 
 
@@ -199,11 +201,10 @@ class UsersAvailable(restful.Resource):
             filters.append(models.User.username == args["username"])
 
         users = models.User.query.filter(filters)
-
         if users.count() == 0:
             return "true", 200
         else:
-            return "false", 200
+            return "Already in use, please try another", 200
 
 
 class Authenticated(restful.Resource):

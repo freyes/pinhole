@@ -27,3 +27,7 @@ div small.error {
 /*   padding: 2px 8px; */
 /*   margin-top: 2px; */
 /* } */
+
+.hide {
+    display: none !important;
+}

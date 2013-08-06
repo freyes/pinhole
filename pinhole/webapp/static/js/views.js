@@ -62,33 +62,48 @@ App.RegisterFormView = Ember.View.extend({
         });
     },
     submit: function(event) {
+        console.log("Starting submit handler");
         var frm = $("#" + this.elementId);
-        frm.append("<i class='icon-spinner'></i>");
+        //frm.append("<i class='icon-spinner icon-spin'></i>");
+        frm.append("swa");
 
         if (!frm.valid()) {
             console.log("form is not in a valid state");
             return false;
         }
 
+        console.log("getting controller");
+        var controller = this.get("controller");
         // TODO: lock the form while the call is being processed
         try {
             var new_user = {username: frm.find("input#username").val(),
                             email: frm.find("input#email").val(),
                             password: frm.find("input#password_1").val()};
+            console.log("register info");
+            console.log(new_user);
             $.ajax({
                 url: "/api/v1/users",
                 dataType: "json",
                 type: "POST",
                 data: new_user,
                 success: function(data) {
-                    console.log(data);
-                    frm.append("account created");
+                    console.log(JSON.stringify(data));
+                    controller.set("account_created", true);
+                    controller.transitionToRoute("register_account_done");
+                    // we indicate to the app that we are logged in
+                    var object = store.load(App.User, data["user"]);
+                    var user = App.User.find(object.id);
+                    var container = controller.get("container");
+                    container.lookup('controller:currentUser').set('content', user);
+                    container.typeInjection('controller', 'currentUser', 'controller:currentUser');
+                    console.log("injected current user");
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     console.log(errorThrown);
                     frm.append(errorThrown);
                 },
                 complete: function() {
+                    console.log("Ajax call completed");
                     frm.addClass("register-done");
                 }
             });
@@ -98,4 +113,46 @@ App.RegisterFormView = Ember.View.extend({
         }
         return false;
     }
+});
+
+App.LoginFormView = Ember.View.extend({
+    tagName: "form",
+    classNames: ['login'],
+    didInsertElement: function() {
+        var frm = $("#" + this.elementId);
+        frm.validate({
+            rules: {
+                username: {required: true},
+                password: {required: true}
+            }
+        });
+    },
+    submit: function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var frm = $("#" + this.elementId);
+
+        if (!frm.valid())
+            return;
+
+        this.get("controller").tryLogin();
+    }
+});
+
+
+App.UserWidgetView = Ember.View.extend({
+    tagName: "ul",
+    classNames: ["nav", "pull-right"],
+    classNameBindings: ['isSignedIn::hide'],
+    isSignedIn: function() {
+        var c = this.get("controller");
+        if (!c)
+            return false;
+
+        c = c.get("currentUser");
+        if (!c)
+            return false;
+
+        return c.get("isSignedIn");
+    }.property("controllers.currentUser.isSignedIn")
 });

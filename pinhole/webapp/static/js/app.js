@@ -59,7 +59,7 @@ function isAuthenticated() {
 function do_login(frm) {
     console.log(frm);
     $(frm).addClass("disabled");
-    $(frm).find("#btn_submit").addClass("disabled").html('<i class="icon-spinner icon-large"></i>');
+    $(frm).find("#btn_submit").addClass("disabled").html('<i class="icon-spinner icon-spin icon-large"></i>');
     var username = $(frm).find("#username").val();
     var password = $(frm).find("#password").val();
 
