@@ -72,6 +72,9 @@ class User(db.Model, BaseModel):
 
     def is_authenticated(self):
         return True
+
+    def is_anonymous(self):
+        return False
     # end required by flask-login
 
     @property

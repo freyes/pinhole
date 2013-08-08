@@ -42,52 +42,28 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               {{#linkTo "index" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>Home</i></a>{{/linkTo}}
-              {{#linkTo "upload" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-upload icon-large"></i> Upload</a>{{/linkTo}}
               {{#linkTo "about" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>About</i></a>{{/linkTo}}
             </ul>
-            {{#view App.UserWidgetView}}
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> {{currentUser.username}} <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Messages</a></li>
-                  <li>{{#linkTo "logout"}}Logout{{/linkTo}}</a>
-                </ul>
-              </li>
-            {{/view}}
           </div><!--/.nav-collapse -->
         </div>
       </div>
     </div>
     <!-- end of header -->
     <!-- container -->
-    <div class="container">
+    <div class="container-fluid">
       {{outlet}}
-          <hr>
-
-          <footer>
-              <p>&copy; Pinhole 2012</p>
+      <div class="row">
+          <footer class="text-center">
+              <p class="mute">&copy; Pinhole 2012</p>
           </footer>
-
+      </div>
     </div><!-- end of container -->
     </script><!-- template: end index -->
 
     <script type="text/x-handlebars" data-template-name="index">
-    <h1>{{#if currentUser.isSignedIn}}Hi, {{currentUser.username}}{{else}}Hello, Guest{{/if}}</h1>
-        <h2>Photos</h2>
-    <div class="row">
-      {{#each photo in content}}
-        <div class="span3">
-          {{#linkTo 'photos.view' photo}}
-            {{view App.ImgView srcBinding="photo.thumbnail" class="thumbnail img-polaroid"}} 
-          {{/linkTo}}
-          {{photo.title}}
-        </div>
-      {{else}}
-        <div class="span12">
-          <p>Sorry, you don't have photos, you should {{#linkTo 'upload'}}upload{{/linkTo}} a few to start using pinhole.</p>
-        </div>
-      {{/each}}
-    </div>
+      <div class="hero-unit">
+        Hi, {{currentUser.username}}
+      </div>
     </script>
 
     <script type="text/x-handlebars" data-template-name="about">
@@ -102,22 +78,62 @@
       foo
     </script>
     <script type="text/x-handlebars" data-template-name="photos">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav sidebar-nav-fixed">
+            <ul class="nav nav-list">
+              <li class="nav-header">Photos</li>
+              {{#linkTo "photos.index" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-home icon-large"></i>All</a>{{/linkTo}}
+              {{#linkTo "photos.upload" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-upload icon-large"></i> Upload</a>{{/linkTo}}
+              {{#linkTo "photos.share" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-share icon-large"></i> Share</a>{{/linkTo}}
+              <li class="nav-header">Account</li>
+              {{#linkTo "logout" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>Logout</a>{{/linkTo}}
+            </ul>
+          </div>
+        </div>
+        <div class="span9">
+          {{outlet}}
+        </div>
+      </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="photos/index">
       <h2>Photos</h2>
-      {{outlet}}
+      <div class="row">
+        {{#each photo in content}}
+          <div class="span3">
+            {{#linkTo 'photos.view' photo}}
+              {{view App.ImgView srcBinding="photo.thumbnail" class="thumbnail img-polaroid"}} 
+            {{/linkTo}}
+            {{photo.title}}
+          </div>
+        {{else}}
+          <div class="span12">
+            <p>Sorry, you don't have photos, you should {{#linkTo 'photos.upload'}}upload{{/linkTo}} a few to start using pinhole.</p>
+          </div>
+        {{/each}}
+      </div>
     </script>
     <script type="text/x-handlebars" data-template-name="photos/view">
-      <h2>{{model.title}}</h2>
-      <div class="span12">
-        {{view App.ImgView srcBinding="model.large_1024" class="img-polaroid"}}
-      </div>
-      <p class="span12">{{model.description}}</p>
-    </script>
-    <script type="text/x-handlebars" data-template-name="upload">
       <div class="row">
-        <div class="span12 text-right">
+        <div class="span12">
+          {{view App.ImgView srcBinding="model.large_1024" class="img-polaroid"}}
+        </div>
+      </div>
+      <div class="row">
+        <p class="span12">{{model.title}}</p>
+        <p class="span12">{{model.description}}</p>
+      </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="photos/upload">
+      <div class="row">
+        <div class="span3">
           <a class="btn upload" href="javascript: upload_dialog();">
-            <i class="icon-upload"></i> Upload
+            <i class="icon-upload"></i>Select files to upload
           </a>
+        </div>
+     </div>
+     <div class="row">
+        <div class="span12">
         </div>
       </div>
 
@@ -129,6 +145,10 @@
         </div>
       {{/each}}
     </div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="photos/share">
+      Share photos.
     </script>
 
     <!-- login view -->
@@ -160,7 +180,15 @@
 
     <!-- logout -->
     <script type="text/x-handlebars" data-template-name="logout">
-      logout
+      {{# if isError }} {{errorMessage}} {{/if}}
+      {{# if loggedOut }}
+      {{else}}
+        <div class="row">
+          <div class="span12">
+            <p><i class="icon-spinner icon-spin"></i> Logging out...</p>
+          </div>
+        </div>
+      {{/if}}
     </script>
 
     <script type="text/x-handlebars" data-template-name="loggedOut">
@@ -253,7 +281,6 @@
       <h2>Unauthorized</h2>
       {{/if}}
     </script>
-    <hr>
 
   <!-- third party -->
   <script type="text/javascript" src="js/vendor/moment.js"></script>

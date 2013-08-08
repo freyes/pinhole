@@ -7,7 +7,8 @@ from sqlalchemy.sql.expression import and_, or_
 from flask import request, send_file
 from flask.ext import restful
 from flask.ext.restful import abort, marshal_with, fields, marshal
-from flask.ext.login import login_required, current_user, login_user
+from flask.ext.login import (login_required, current_user, login_user,
+                             logout_user)
 from pinhole.common import models
 from pinhole.common.app import db, app
 from flask.ext.restful import Api
@@ -233,6 +234,13 @@ class Authenticated(restful.Resource):
                             "user": user_fields["user"]}), 200
         else:
             return abort(404, message="Invalid username/password combination")
+
+    def delete(self):
+        try:
+            logout_user()
+            return ("logged out", 200)
+        except Exception as ex:
+            return abort(404, message="Couldn't logout: {}".format(repr(ex)))
 
 
 endpoints = [(Photo, '/photos/<int:photo_id>'),

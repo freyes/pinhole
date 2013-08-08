@@ -6,8 +6,9 @@ App.ApplicationController = Ember.Controller.extend({
 
 App.CurrentUserController = Ember.ObjectController.extend({
     isSignedIn: function() {
+        console.log("computing currentUser.isSignedIn");
         return (this.get("content") != null);
-    }.property("@content")
+    }.property("@content").readOnly()
 });
 
 // Create the login controller
@@ -48,6 +49,33 @@ App.LoginController = Ember.ObjectController.extend({
     }
 });
 
+App.LogoutController = Ember.ObjectController.extend({
+    loggedOut: false,
+    isError: false,
+    errorMessage: "",
+    logout: function() {
+        var controller = this;
+        $.ajax("/api/v1/authenticated",
+               {
+                   type: "delete",
+                   success: function(data) {
+                       controller.set("loggedOut", true);
+                       console.log("success");
+                       var container = controller.get("container");
+                       container.lookup('controller:currentUser').set('content', {});
+                       controller.transitionTo("index");
+                   },
+                   error: function(jqXHR, textStatus, errorThrown) {
+                       console.log("error");
+                       var response = $.parseJSON(jqXHR.responseText);
+                       controller.set("errorMessage", response["message"] || textStatus);
+                       controller.set("isError", true);
+                   }
+               });
+        console.log("logging out");
+    }
+});
+
 Ember.Application.initializer({
   name: "currentUser",
   initialize: function(container, application) {
@@ -62,11 +90,10 @@ Ember.Application.initializer({
   }
 });
 
-App.IndexController = Ember.ArrayController.extend({
-    sortAscending: true,
+App.PhotosIndexController = Ember.ArrayController.extend({
+    sortAscending: false,
     sortProperties: ['id']
 });
-
 
 App.RegisterAccountController = Ember.ObjectController.extend({
     needs: ["register_account_done"],
@@ -78,4 +105,15 @@ App.RegisterAccountDoneController = Ember.ObjectController.extend({
     account_created: function() {
         return this.get("controllers.register_account").get("account_created");
     }.property("controllers.register_account.account_created")
+});
+
+App.UserWidgetController = Ember.ObjectController.extend({
+    isSignedIn: function() {
+        console.log("computing isSignedIn");
+        var c = this.get("currentUser");
+        if (!c)
+            return false;
+
+        return c.get("isSignedIn");
+    }.property("controllers.currentUser.content")
 });

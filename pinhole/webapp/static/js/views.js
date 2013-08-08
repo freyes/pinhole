@@ -141,18 +141,19 @@ App.LoginFormView = Ember.View.extend({
 
 
 App.UserWidgetView = Ember.View.extend({
+    needs: ["currentUser"],
     tagName: "ul",
     classNames: ["nav", "pull-right"],
     classNameBindings: ['isSignedIn::hide'],
     isSignedIn: function() {
+        console.log("computing isSignedIn");
         var c = this.get("controller");
         if (!c)
             return false;
-
         c = c.get("currentUser");
         if (!c)
             return false;
 
         return c.get("isSignedIn");
-    }.property("controllers.currentUser.isSignedIn")
+    }.property("controllers.currentUser")
 });

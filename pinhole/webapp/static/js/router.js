@@ -1,9 +1,10 @@
 App.Router.map(function() {
     // put your routes here
-    this.route("upload", { path: "/upload" });
     this.route("about", {path: "/about"});
     this.resource("photos", function() {
         this.route("view", {path: "/:photo_id"});
+        this.route("upload", { path: "/upload" });
+        this.route("share", { path: "/share" });
     });
     this.route("loggedOut", {path: "/loggedOut"});
     this.route("login", {path: "/login"});
@@ -14,20 +15,11 @@ App.Router.map(function() {
 });
 
 App.IndexRoute = Ember.Route.extend({
-    setupController: function(controller){
-        controller.set("content", App.Photo.find());
-    },
     redirect: function() {
         var authenticated = isAuthenticated();
         if (!authenticated) {
             this.transitionTo("login");
         }
-    }
-});
-
-App.UploadRoute = Ember.Route.extend({
-    model: function() {
-        return App.UploadedPhoto.find();
     }
 });
 
@@ -37,8 +29,31 @@ App.UserRoute = Ember.Route.extend({
     }
 });
 
+App.PhotosIndexRoute = Ember.Route.extend({
+    setupController: function(controller){
+        controller.set("content", App.Photo.find());
+    }
+});
+
 App.PhotosViewRoute = Ember.Route.extend({
     model: function(params) {
         return App.Photo.find(params.photo_id);
+    }
+});
+
+App.PhotosUploadRoute = Ember.Route.extend({
+    model: function() {
+        return App.UploadedPhoto.find();
+    }
+});
+
+App.LogoutRoute = Ember.Route.extend({
+    renderTemplate: function(controller, model) {
+        try {
+            controller.logout();
+            this._super(controller, model);
+        } catch (e) {
+            console.log(e);
+        }
     }
 });
