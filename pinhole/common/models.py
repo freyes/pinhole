@@ -331,7 +331,8 @@ class Photo(db.Model, BaseModel):
 
         # the image doesn't exist, so let's create it
         key = bucket.get_key(parsed.path.lstrip("/"))
-        assert key is not None
+        if key is None:
+            raise ValueError("{} - {}".format(self.s3_path, parsed.path))
 
         tmp_image = TemporaryFile(suffix=path.basename(parsed.path))
         key.get_contents_to_file(tmp_image)
