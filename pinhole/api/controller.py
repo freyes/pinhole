@@ -92,8 +92,15 @@ class PhotoList(restful.Resource):
                 filters.append(prop == request.args[key])
 
         photos = photos.filter(filters)
-        if args["order_by"] in photo_fields:
-            photos = photos.order_by(args["order_by"])
+        if args["order_by"].lstrip("-") in photo_fields:
+            from sqlalchemy.sql.expression import desc
+            if args["order_by"].startswith("-"):
+                photos = photos.order_by(desc(args["order_by"].lstrip("-")))
+            else:
+                photos = photos.order_by(args["order_by"])
+
+        if args["limit"]:
+            photos = photos.limit(args["limit"])
 
         return {"photos": photos.all()}
 
