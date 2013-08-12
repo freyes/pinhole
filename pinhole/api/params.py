@@ -65,6 +65,7 @@ photo_parser.add_argument('picture', type=FileStorage, location='files',
 photolist_parser = reqparse.RequestParser()
 photolist_parser.add_argument("order_by", type=str,
                               default="DateTimeOriginal")
+photolist_parser.add_argument("limit", type=int, default=0)
 
 _user_fields = {
     "id": fields.Integer,
