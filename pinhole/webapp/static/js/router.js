@@ -20,6 +20,10 @@ App.IndexRoute = Ember.Route.extend({
         if (!authenticated) {
             this.transitionTo("login");
         }
+    },
+    setupController: function(controller) {
+        controller.set("content", App.Photo.find({limit: 5,
+                                                  order_by: "-timestamp"}));
     }
 });
 

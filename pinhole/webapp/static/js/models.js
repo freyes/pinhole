@@ -34,8 +34,20 @@ App.Photo = DS.Model.extend({
     DateTimeDigitized: DS.attr("string"),
     DateTimeOriginal: DS.attr("string"),
     // calculated properties
+    orientation: function() {
+        return this.get("height") < this.get("width") ? "landscape" : "portrait";
+    },
+    isPortrait: function () {
+        return this.get("height") > this.get("width");
+    },
     thumbnail: function() {
         return "/api/v1/photos/file/" + this.get("id") + "/thumbnail/f.jpg";
+    }.property(),
+    small_240: function() {
+        return "/api/v1/photos/file/" + this.get("id") + "/small_240/f.jpg";
+    }.property(),
+    small_320: function() {
+        return "/api/v1/photos/file/" + this.get("id") + "/small_320/f.jpg";
     }.property(),
     large_1024: function() {
         return "/api/v1/photos/file/" + this.get("id") + "/large_1024/f.jpg";

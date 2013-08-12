@@ -64,6 +64,16 @@
       <div class="hero-unit">
         Hi, {{currentUser.username}}
       </div>
+
+      <div class="row">
+        <div class="span12">
+          <div class="collage">
+            {{#each photo in content}}
+              {{#linkTo "photos.view" photo}}{{view App.ImgView srcBinding="photo.small_320"}}{{/linkTo}}
+            {{/each}}
+          </div>
+        </div>
+      </div>
     </script>
 
     <script type="text/x-handlebars" data-template-name="about">
