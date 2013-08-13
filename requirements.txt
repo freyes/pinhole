@@ -8,3 +8,4 @@ Sphinx
 sphinxcontrib-httpdomain
 Pillow==2.1.0
 Celery==3.0
+MySQL-python
