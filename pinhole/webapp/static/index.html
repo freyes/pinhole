@@ -88,19 +88,25 @@
       foo
     </script>
     <script type="text/x-handlebars" data-template-name="photos">
-      <div class="row-fluid">
-        <div class="span3">
-          <div class="well sidebar-nav sidebar-nav-fixed">
-            <ul class="nav nav-list">
-              <li class="nav-header">Photos</li>
-              {{#linkTo "photos.index" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-home icon-large"></i>All</a>{{/linkTo}}
-              {{#linkTo "photos.upload" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-upload icon-large"></i> Upload</a>{{/linkTo}}
-              {{#linkTo "photos.share" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-share icon-large"></i> Share</a>{{/linkTo}}
-              <li class="nav-header">Account</li>
-              {{#linkTo "logout" tagName="li" href=false}}<a {{bindAttr href="view.href"}}>Logout</a>{{/linkTo}}
-            </ul>
-          </div>
-        </div>
+      <div id="wrapper">
+        <div class="my-sidebar">
+          <a class="btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	    <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <!-- <div id="logo"> <a href="/"><img src="img/logo.svg" alt="logo" /></a> </div> -->
+	  <nav id="nav" class="navigation" role="navigation">
+	    <ul class="unstyled">
+                {{#linkTo "photos.index" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-home"></i><span>All</span></a>{{/linkTo}}
+                {{#linkTo "photos.upload" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-upload"></i><span>Upload</span></a>{{/linkTo}}
+                {{#linkTo "photos.share" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-share"></i><span>Share</span></a>{{/linkTo}}
+                {{#linkTo "logout" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-off"></i><span>Logout</span></a>{{/linkTo}}
+	    </ul>
+	  </nav><!-- /nav -->
+        </div><!-- /my-sidebar -->
+
+      <div id="container">
         <div class="span9">
           {{outlet}}
         </div>
