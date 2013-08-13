@@ -128,7 +128,7 @@ tags = db.Table('tag_photo',
 
 class UploadedPhoto(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    url = db.Column(db.String(2000))
+    url = db.Column(db.Text(2048))
     filename = db.Column(db.String(200))
     size = db.Column(db.Integer)
     key = db.Column(db.String(100))
@@ -150,15 +150,15 @@ class Photo(db.Model, BaseModel):
     title = db.Column(db.String(120))
     timestamp = db.Column(db.DateTime, default=datetime.now)
     public = db.Column(db.Boolean, default=False)
-    description = db.Column(db.Text)
-    url = db.Column(db.String(2000))
+    description = db.Column(db.Text(2048))
+    url = db.Column(db.Text(2048))
     rating = db.Column(db.Float)
 
     width = db.Column(db.Integer)
     height = db.Column(db.Integer)
     type = db.Column(db.String(20))
 
-    s3_path = db.Column(db.String(2048), unique=True, nullable=True)
+    s3_path = db.Column(db.Text(2048), nullable=True)
 
     # deleted ?
     deleted = db.Column(db.Boolean, default=False)
