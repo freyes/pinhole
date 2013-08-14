@@ -12,6 +12,8 @@ from .auth import check_password, make_password
 from .s3 import S3Adapter
 from .exif import exif_transform
 from .extensions import db
+from .utils import convert
+from .dbtypes import RationalType, DateTime
 
 
 exif_tags = ExifTags.TAGS
@@ -134,7 +136,7 @@ class UploadedPhoto(db.Model, BaseModel):
     key = db.Column(db.String(100))
     is_writeable = db.Column(db.Boolean)
     processed = db.Column(db.Boolean, default=False)
-    uploaded_at = db.Column(db.DateTime, default=datetime.now)
+    uploaded_at = db.Column(DateTime, default=datetime.now)
 
     # relationships
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
@@ -148,7 +150,7 @@ class UploadedPhoto(db.Model, BaseModel):
 class Photo(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(120))
-    timestamp = db.Column(db.DateTime, default=datetime.now)
+    timestamp = db.Column(DateTime, default=datetime.now)
     public = db.Column(db.Boolean, default=False)
     description = db.Column(db.Text(2048))
     url = db.Column(db.Text(2048))
@@ -162,18 +164,45 @@ class Photo(db.Model, BaseModel):
 
     # deleted ?
     deleted = db.Column(db.Boolean, default=False)
-    deleted_at = db.Column(db.DateTime, nullable=True)
+    deleted_at = db.Column(DateTime, nullable=True)
 
     # exif metadata
-    Make = db.Column(db.String(40))
-    Model = db.Column(db.String(40))
-    Software = db.Column(db.String(40))
-    HostComputer = db.Column(db.String(40))
-    Orientation = db.Column(db.Integer)
+    make = db.Column(db.String(40))
+    model = db.Column(db.String(40))
+    orientation = db.Column(db.Integer)
+    x_resolution = db.Column(RationalType)
+    y_resolution = db.Column(RationalType)
+    resolution_unit = db.Column(db.Integer)
+    exposure_time = db.Column(RationalType)
+    f_number = db.Column(RationalType)  # aperture
+    exposure_program = db.Column(db.String(40))
+    exif_version = db.Column(db.String(40))
+    flash = db.Column(db.String(40))
+    focal_length = db.Column(RationalType)
+    color_space = db.Column(db.String(40))
+    pixel_x_dimension = db.Column(db.Integer)
+    pixel_y_dimension = db.Column(db.Integer)
+    iso_speed_ratings = db.Column(db.String(10))
 
-    DateTime = db.Column(db.DateTime)
-    DateTimeDigitized = db.Column(db.DateTime)
-    DateTimeOriginal = db.Column(db.DateTime)
+    aperture_value = db.Column(RationalType)
+    max_aperture_value = db.Column(db.String(10))
+    metering_mode = db.Column(db.String(10))
+    exposure_mode = db.Column(db.String(10))
+
+    # lens information
+    lens_specification = db.Column(db.String(10))
+    lens_make = db.Column(db.String(40))
+    lens_model = db.Column(db.String(40))
+
+    software = db.Column(db.String(40))
+    host_computer = db.Column(db.String(40))
+
+    date_time = db.Column(DateTime)
+    date_time_digitized = db.Column(DateTime)
+    date_time_original = db.Column(DateTime)
+
+    copyright = db.Column(db.String(40))
+    camera_owner_name = db.Column(db.String(100))
 
     # relationships
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
@@ -272,7 +301,9 @@ class Photo(db.Model, BaseModel):
 
         # process exif tags
         f.stream.seek(0)
-        photo.process_exif(f.stream)
+        img = Image.open(f.stream)
+        photo.width, photo.height = img.size
+        photo.process_exif(image=img)
 
         db.session.add(photo)
         db.session.commit()
@@ -355,20 +386,25 @@ class Photo(db.Model, BaseModel):
         new_image.seek(0)
         return new_image
 
-    def process_exif(self, stream):
+    def process_exif(self, stream=None, image=None):
         """
         Process EXIF tags and save them in the object properties
 
         :param stream: file-like object
         :type stream: file
+        :param image: image object
+        :type image: :class:`PIL.Image.Image`
         :rtype: dict
         :returns: a dictionary with all the exif tags found
         """
         ret = {}
-        i = Image.open(stream)
-        if not i:
-            msg = "Stream {} couldn't be opened as image".format(stream)
-            raise ValueError(msg)
+        if not image:
+            i = Image.open(stream)
+            if not i:
+                msg = "Stream {} couldn't be opened as image".format(stream)
+                raise ValueError(msg)
+        else:
+            i = image
 
         info = i._getexif()
 
@@ -378,11 +414,13 @@ class Photo(db.Model, BaseModel):
 
         for tag, value in info.items():
             decoded = exif_tags.get(tag, tag)
-            if isinstance(decoded, basestring) and hasattr(self, decoded):
-                if decoded in exif_transform:
-                    value = exif_transform[decoded](value)
-                setattr(self, decoded, value)
+            converted = convert(decoded)
+            if isinstance(decoded, basestring) and hasattr(self, converted):
+                if converted in exif_transform:
+                    value = exif_transform[converted](value)
+                setattr(self, converted, value)
             ret[decoded] = value
+
         return ret
 
     def gen_s3_key(self, fname, prefix=""):
@@ -408,4 +446,4 @@ class Photo(db.Model, BaseModel):
 
 class Roll(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(DateTime)

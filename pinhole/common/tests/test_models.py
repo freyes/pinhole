@@ -96,3 +96,34 @@ class TestPhoto(BaseTest):
         image = Image.open(pio)
         if size != "raw":
             assert_equal(image.size[0], Photo.sizes[size])
+
+    def test_exif_tags_processed(self):
+        l = [("make", "Canon"),
+             ("model", "Canon EOS 40D"),
+             ("orientation", 1),
+             ("x_resolution", (4718592, 65536)),
+             ("y_resolution", (4718592, 65536)),
+             ("resolution_unit", 2),
+             ("exposure_time", (1, 500)),
+             ("f_number", (71, 10)),
+             ("exposure_program", 3),
+             ("exif_version", "0220"),
+             ("flash", 16),
+             ("focal_length", (24, 1)),
+             ("color_space", 1),
+             ("pixel_x_dimension", None),
+             ("pixel_y_dimension", None),
+             ("iso_speed_ratings", 125),
+             ("aperture_value", (368640, 65536)),
+             ("metering_mode", 5),
+             ("exposure_mode", 2),
+             ("software", u'QuickTime 7.6.6'),
+             ("host_computer", u'Mac OS X 10.6.4'),
+             ("date_time", u'2010:07:25 20:26:50'),
+             ("date_time_digitized", '2010:07:05 18:55:35'),
+             ("date_time_original", '2010:07:05 18:55:35'),
+             ]
+        for attr, expected in l:
+            value = getattr(self.photo, attr)
+            assert_equal(value, expected,
+                         "photo.%s -> %s != %s" % (attr, value, expected))

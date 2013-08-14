@@ -7,6 +7,7 @@ from contextlib import contextmanager
 RE_FIRST_CAP = re.compile('(.)([A-Z][a-z]+)')
 RE_ALL_CAP = re.compile('([a-z0-9])([A-Z])')
 
+
 @contextmanager
 def mkdtemp(*args, **kwargs):
     d = tempfile.mkdtemp(*args, **kwargs)
