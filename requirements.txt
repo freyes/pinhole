@@ -1,4 +1,4 @@
-setuptools==1.0
+https://pypi.python.org/packages/source/s/setuptools/setuptools-1.0.tar.gz
 flask
 flask-restful
 flask-sqlalchemy
