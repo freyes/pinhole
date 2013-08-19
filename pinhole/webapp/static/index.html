@@ -52,9 +52,10 @@
     <!-- container -->
     <div class="container-fluid">
       {{outlet}}
+      <div class="clearfix"></div>
       <div class="row">
           <footer class="text-center">
-              <p class="mute">&copy; Pinhole 2012</p>
+              <p class="muted">&copy; Pinhole 2012</p>
           </footer>
       </div>
     </div><!-- end of container -->
@@ -138,6 +139,25 @@
       <div class="row">
         <p class="span12">{{model.title}}</p>
         <p class="span12">{{model.description}}</p>
+        <h3>Properties</h3>
+        <p class="span12">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <td>Dimensions</td>
+                <td>{{photo.width}} x {{photo.height}}</td>
+              </tr>
+              <tr>
+                <td>Camera</td>
+                <td>{{photo.Make}} {{photo.Model}}</td>
+              </tr>
+              <tr>
+                <td>Datetime</td>
+                <td>{{photo.DateTime}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </p>
       </div>
     </script>
     <script type="text/x-handlebars" data-template-name="photos/upload">

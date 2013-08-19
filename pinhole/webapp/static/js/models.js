@@ -27,12 +27,12 @@ App.Photo = DS.Model.extend({
     //tags: DS.attr("string"),
     height: DS.attr("number"),
     width: DS.attr("number"),
-    Make: DS.attr("string"),
-    Model: DS.attr("string"),
-    Software: DS.attr("string"),
-    DateTime: DS.attr("string"),
-    DateTimeDigitized: DS.attr("string"),
-    DateTimeOriginal: DS.attr("string"),
+    make: DS.attr("string"),
+    model: DS.attr("string"),
+    software: DS.attr("string"),
+    dateTime: DS.attr("string"),
+    dateTimeDigitized: DS.attr("string"),
+    dateTimeOriginal: DS.attr("string"),
     // calculated properties
     orientation: function() {
         return this.get("height") < this.get("width") ? "landscape" : "portrait";

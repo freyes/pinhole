@@ -35,7 +35,7 @@ App.UserRoute = Ember.Route.extend({
 
 App.PhotosIndexRoute = Ember.Route.extend({
     setupController: function(controller){
-        controller.set("content", App.Photo.find());
+        controller.set("content", App.Photo.find({order_by: "-timestamp"}));
     }
 });
 
