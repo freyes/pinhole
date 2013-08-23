@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import time
 import uuid
 import warnings
 import logging
@@ -295,7 +296,14 @@ class Photo(db.Model, BaseModel):
         bucket = s3conn.get_bucket(app.config["PHOTO_BUCKET"])
         k = Key(bucket)
         k.key = photo.gen_s3_key(f.filename)
-        k.set_contents_from_file(f.stream)
+
+        for i in range(5):
+            try:
+                f.stream.seek(0)
+                k.set_contents_from_file(f.stream)
+                break
+            except:
+                time.sleep(1)
 
         photo.s3_path = "s3://%s/%s" % (bucket.name, k.key)
 
