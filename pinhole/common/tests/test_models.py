@@ -60,7 +60,7 @@ class TestPhoto(BaseTest):
         assert bucket is not None
         self.s3_keys = bucket.get_all_keys()
 
-        u = User("foob4r", "foobar@bar.com")
+        u = User("foob4r", "foobar12@bar.com")
         u.first_name = "Foo"
         u.last_name = "Bar"
         u.active = True

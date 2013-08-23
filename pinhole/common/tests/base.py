@@ -5,12 +5,19 @@ from pinhole.common.app import db, app
 class BaseTest(object):
     def setUp(self):
         try:
+            db.session.rollback()
+        except Exception as ex:
+            print ex
+        try:
             db.drop_all()
-        except:
-            pass
+        except Exception as ex:
+            print ex
 
         db.create_all()
         self.app = TestApp(app)
 
     def tearDown(self):
-        db.drop_all()
+        try:
+            db.drop_all()
+        except Exception as ex:
+            pass
