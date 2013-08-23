@@ -31,7 +31,7 @@ class RationalType(types.TypeDecorator):
 
 class DateTime(types.TypeDecorator):
     impl = CHAR
-    FORMAT = "%Y-%m-%d %H:%M:%SZ%Z"
+    FORMAT = "%Y-%m-%d %H:%M:%S"
 
     def load_dialect_impl(self, dialect):
         if dialect.name == "sqlite":
