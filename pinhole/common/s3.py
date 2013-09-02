@@ -13,6 +13,11 @@ __all__ = ["S3Adapter", "CACHE_DIR", "get_image", "upload_image", "is_valid",
            "get_cache_fpath"]
 CACHE_DIR = os.environ.get("PINHOLE_CACHE_DIR",
                            mkdtemp("-cache", "pinhole-"))
+if not path.isdir(CACHE_DIR):
+    if not path.exists(CACHE_DIR):
+        os.makedirs(CACHE_DIR)
+    else:
+        raise ValueError("%s is not a directory" % CACHE_DIR)
 
 
 class S3Adapter(S3Connection):

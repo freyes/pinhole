@@ -20,4 +20,4 @@ class BaseTest(object):
         try:
             db.drop_all()
         except Exception as ex:
-            pass
+            print ex

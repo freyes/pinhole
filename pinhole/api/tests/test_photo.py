@@ -112,33 +112,37 @@ class TestPhotoController(BaseTest):
         res = self.app.post("/api/v1/photos", params)
 
         assert_equal(res.status_int, 200)
-        assert_in("id", res.json)
-        assert_equal(res.json["title"], "my title")
-        assert_equal(res.json["description"], "my description")
-        assert_equal(res.json["rating"], 1.3)
+        assert_in("photo", res.json)
+        p = res.json["photo"]
+        assert_in("id", p)
+        assert_equal(p["title"], "my title")
+        assert_equal(p["description"], "my description")
+        assert_equal(p["rating"], 1.3)
 
         if tags:
             splited_tags = [x.strip() for x in tags.split(",")]
-            assert_in("tags", res.json)
-            assert_is_instance(res.json["tags"], list)
-            assert_equal(len(res.json["tags"]), len(splited_tags),
-                         res.json["tags"])
-            assert_equal(sorted([x["name"] for x in res.json["tags"]]),
+            assert_in("tags", p)
+            assert_is_instance(p["tags"], list)
+            assert_equal(len(p["tags"]), len(splited_tags),
+                         p["tags"])
+            assert_equal(sorted([x["name"] for x in p["tags"]]),
                          sorted(splited_tags))
 
-        photo = models.Photo.get_by(id=int(res.json["id"]))
+        photo = models.Photo.get_by(id=int(p["id"]))
         assert_true(photo.s3_path is not None,
                     "s3_path is None: %s" % photo.s3_path)
         assert_true(photo.s3_path.endswith("4843655940_d8dd79d602_o.jpg"))
         # exif checks
-        assert_equal(photo.DateTime, datetime(2010, 7, 25, 20, 26, 50))
-        assert_equal(photo.DateTimeOriginal, datetime(2010, 7, 5, 18, 55, 35))
-        assert_equal(photo.DateTimeDigitized, datetime(2010, 7, 5, 18, 55, 35))
-        assert_equal(photo.Make, u"Canon")
-        assert_equal(photo.Model, u"Canon EOS 40D")
-        assert_equal(photo.Software, u'QuickTime 7.6.6')
-        assert_equal(photo.HostComputer, u'Mac OS X 10.6.4')
-        assert_equal(photo.Orientation, 1)
+        assert_equal(photo.date_time, datetime(2010, 7, 25, 20, 26, 50))
+        assert_equal(photo.date_time_original,
+                     datetime(2010, 7, 5, 18, 55, 35))
+        assert_equal(photo.date_time_digitized,
+                     datetime(2010, 7, 5, 18, 55, 35))
+        assert_equal(photo.make, u"Canon")
+        assert_equal(photo.model, u"Canon EOS 40D")
+        assert_equal(photo.software, u'QuickTime 7.6.6')
+        assert_equal(photo.host_computer, u'Mac OS X 10.6.4')
+        assert_equal(photo.orientation, 1)
 
 
 class TestPhotoGetWithFilters(object):
@@ -173,14 +177,14 @@ class TestPhotoGetWithFilters(object):
             photo.height = 10 * (i + 1)
 
             # exif
-            photo.Make = "Make%s" % i
-            photo.Model = "Model%s" % i
-            photo.Software = "Software%s" % i
-            photo.HostComputer = "HostComputer%s" % i
-            photo.Orientation = 1
-            photo.DateTime = start + timedelta(seconds=3600 * i)
-            photo.DateTimeDigitized = start + timedelta(seconds=3600 * i + 1)
-            photo.DateTimeOriginal = start + timedelta(seconds=3600 * i + 2)
+            photo.make = "Make%s" % i
+            photo.model = "Model%s" % i
+            photo.software = "Software%s" % i
+            photo.host_computer = "HostComputer%s" % i
+            photo.orientation = 1
+            photo.date_time = start + timedelta(seconds=3600 * i)
+            photo.date_time_digitized = start + timedelta(seconds=3600 * i + 1)
+            photo.date_time_original = start + timedelta(seconds=3600 * i + 2)
             photo.user = cls.user
             photo.roll = cls.roll
 
@@ -193,19 +197,10 @@ class TestPhotoGetWithFilters(object):
 
     @classmethod
     def login(cls, username, password):
-        res = cls.app.get("/")
-        assert res.headers["Location"].endswith("/account/login?next=%2F"), \
-            res.headers["Location"]
-
-        res = res.follow()
-
-        frm = res.forms["frm_login"]
-        frm["username"] = username
-        frm["password"] = password
-        res = frm.submit()
-
-        res = res.follow()
-        res.mustcontain("Logged in")
+        res = cls.app.post("/api/v1/authenticated",
+                           params={"username": username,
+                                   "password": password})
+        assert_true(res.json["authenticated"], "I couldn't authenticate")
 
     @classmethod
     def tearDownClass(cls):
@@ -218,7 +213,7 @@ class TestPhotoGetWithFilters(object):
         db.drop_all()
 
     def test_filters(self):
-        yield self.check_filters, {"Make": "Make2"}, \
+        yield self.check_filters, {"make": "Make2"}, \
             json.loads(json.dumps(marshal([self.photos[2]],
                                           photo_fields)))
         data = marshal([p for p in self.photos if p.id > 10], photo_fields)

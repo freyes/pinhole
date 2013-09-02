@@ -26,13 +26,15 @@ def application(environ=None, start_response=None):
 
     if not hasattr(app, "login_manager") or app.login_manager is None:
         login_manager.init_app(app)
+        from .models import User
+        login_manager.user_loader(lambda id_: User.get_by(id=id_))
 
     # api controllersm dynamic import to prevent Chinese Lock
     for m in ["controller", ]:
         import_module("pinhole.api.%s" % m)
 
     # web app controllers dynamic import to prevent Chinese Lock
-    for m in ["main", "static", "auth", "upload"]:
+    for m in ["main", "static", "upload"]:
         import_module("pinhole.webapp.%s" % m)
 
     if not environ or not start_response:

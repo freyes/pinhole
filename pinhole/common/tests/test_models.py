@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from os import path
+from datetime import datetime
 from PIL import Image
 from werkzeug.datastructures import FileStorage
 from nose.tools import (assert_is, assert_is_not, assert_raises, assert_equal,
@@ -119,11 +120,14 @@ class TestPhoto(BaseTest):
              ("exposure_mode", 2),
              ("software", u'QuickTime 7.6.6'),
              ("host_computer", u'Mac OS X 10.6.4'),
-             ("date_time", u'2010:07:25 20:26:50'),
-             ("date_time_digitized", '2010:07:05 18:55:35'),
-             ("date_time_original", '2010:07:05 18:55:35'),
+             ("date_time", datetime(2010, 07, 25, 20, 26, 50)),
+             ("date_time_digitized", datetime(2010, 07, 05, 18, 55, 35)),
+             ("date_time_original", datetime(2010, 07, 05, 18, 55, 35)),
              ]
         for attr, expected in l:
             value = getattr(self.photo, attr)
             assert_equal(value, expected,
-                         "photo.%s -> %s != %s" % (attr, value, expected))
+                         "photo.%s -> %s (%s) != %s (%s)" % (attr, value,
+                                                             type(value),
+                                                             expected,
+                                                             type(expected)))

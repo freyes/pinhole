@@ -41,12 +41,12 @@ photo_fields = {
     "tags": fields.List(fields.Nested(tag_fields)),
     "height": fields.Raw,
     "width": fields.Raw,
-    "Make": fields.Raw,
-    "Model": fields.Raw,
-    "Software": fields.Raw,
-    "DateTime": fields.DateTime,
-    "DateTimeDigitized": fields.DateTime,
-    "DateTimeOriginal": fields.DateTime,
+    "make": fields.Raw,
+    "model": fields.Raw,
+    "software": fields.Raw,
+    "date_time": fields.DateTime,
+    "date_time_digitized": fields.DateTime,
+    "date_time_original": fields.DateTime,
 }
 
 photos_fields = {"photos": fields.List(fields.Nested(photo_fields))}

@@ -13,6 +13,6 @@ def transform_datetime(raw_value, fail_silently=True):
             return None
 
 
-exif_transform = {"DateTime": transform_datetime,
-                  "DateTimeDigitized": transform_datetime,
-                  "DateTimeOriginal": transform_datetime}
+exif_transform = {"date_time": transform_datetime,
+                  "date_time_digitized": transform_datetime,
+                  "date_time_original": transform_datetime}

@@ -55,7 +55,7 @@ class Photo(restful.Resource):
 
 class PhotoList(restful.Resource):
     @login_required
-    @marshal_with(photo_fields)
+    @marshal_with(foto_fields)
     def post(self):
         args = photo_parser.parse_args()
         photo = models.Photo.from_file(current_user,
@@ -72,7 +72,7 @@ class PhotoList(restful.Resource):
             for tag_name in tags.split(","):
                 photo.add_tag(tag_name.strip())
 
-        return photo
+        return {"photo": photo}
 
     @login_required
     @marshal_with(photos_fields)

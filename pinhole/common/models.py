@@ -1,6 +1,4 @@
 from __future__ import absolute_import
-import time
-import uuid
 import warnings
 import logging
 from tempfile import TemporaryFile
@@ -341,7 +339,8 @@ class Photo(db.Model, BaseModel):
         image_s3_path = self.gen_s3_key(path.basename(parsed.path), size)
 
         try:
-            return s3.get_image("s3://%s/%s" % (parsed.hostname, image_s3_path))
+            return s3.get_image("s3://%s/%s" % (parsed.hostname,
+                                                image_s3_path))
         except PinholeFileNotFound:
             pass
 
