@@ -9,8 +9,9 @@ from urlparse import urlparse
 from os import path
 from PIL import Image, ExifTags
 from boto.s3.key import Key
+from pinhole.exception import PinholeFileNotFound
 from .auth import check_password, make_password
-from .s3 import S3Adapter
+from . import s3
 from .exif import exif_transform
 from .extensions import db
 from .utils import convert
@@ -292,20 +293,9 @@ class Photo(db.Model, BaseModel):
 
         # do we have to offload the upload process
         # to a celery task?
-        s3conn = S3Adapter()
-        bucket = s3conn.get_bucket(app.config["PHOTO_BUCKET"])
-        k = Key(bucket)
-        k.key = photo.gen_s3_key(f.filename)
-
-        for i in range(5):
-            try:
-                f.stream.seek(0)
-                k.set_contents_from_file(f.stream)
-                break
-            except:
-                time.sleep(1)
-
-        photo.s3_path = "s3://%s/%s" % (bucket.name, k.key)
+        photo.s3_path = "s3://%s/%s" % (app.config["PHOTO_BUCKET"],
+                                        photo.gen_s3_key(f.filename))
+        s3.upload_image(f.stream, photo.s3_path)
 
         # process exif tags
         f.stream.seek(0)
@@ -348,25 +338,27 @@ class Photo(db.Model, BaseModel):
             warnings.warn("File format is not implemented yet")
 
         parsed = urlparse(self.s3_path)
+        image_s3_path = self.gen_s3_key(path.basename(parsed.path), size)
 
-        s3conn = S3Adapter()
+        try:
+            return s3.get_image("s3://%s/%s" % (parsed.hostname, image_s3_path))
+        except PinholeFileNotFound:
+            pass
+
+        s3conn = s3.S3Adapter()
         bucket = s3conn.get_bucket(parsed.hostname)
 
         if size == "raw":
             key = bucket.get_key(parsed.path.lstrip("/"))
-        else:
-            # look for existing image
-            image_s3_path = self.gen_s3_key(path.basename(parsed.path), size)
-            key = bucket.get_key(image_s3_path)
+            if key is not None:
+                # we have the image!
+                fpath = s3.get_cache_fpath(self.s3_path)
+                tmp_image = open(fpath, "wb+")
+                key.get_contents_to_file(tmp_image)
+                tmp_image.flush()
+                tmp_image.seek(0)
 
-        if key is not None:
-            # we have the image!
-            tmp_image = TemporaryFile(suffix=path.basename(parsed.path))
-            key.get_contents_to_file(tmp_image)
-            tmp_image.flush()
-            tmp_image.seek(0)
-
-            return tmp_image
+                return tmp_image
 
         # the image doesn't exist, so let's create it
         key = bucket.get_key(parsed.path.lstrip("/"))
@@ -383,8 +375,12 @@ class Photo(db.Model, BaseModel):
         img_obj.thumbnail((s, s), Image.ANTIALIAS)
 
         #upload the image
-        new_image = TemporaryFile(suffix=path.basename(parsed.path))
+        image_s3_path = self.gen_s3_key(path.basename(parsed.path), size)
+        cache_fpath = s3.get_cache_fpath(image_s3_path)
+        print "using ", cache_fpath
+        new_image = open(cache_fpath, "wb+")
         img_obj.save(new_image, format="JPEG")
+        new_image.flush()
         new_image.seek(0)
 
         key = Key(bucket)
@@ -442,14 +438,12 @@ class Photo(db.Model, BaseModel):
         :rtype: str
         :returns: a S3 key (i.e. `foo/bar/myphoto.jpg`)
         """
-        uid = uuid.uuid1()
         if prefix:
             fname = "%s_%s" % (prefix, fname)
 
-        return "%s/%s/%s/%s_%s" % (self.user.username,
-                                   datetime.now().strftime("%Y_%m_%d"),
-                                   uid, uid,
-                                   fname)
+        return "%s/%r/%s" % (self.user.username,
+                             self.id,
+                             fname)
 
 
 class Roll(db.Model, BaseModel):
