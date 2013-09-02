@@ -54,7 +54,7 @@ def get_image(uri, dst=None, access_key=None, secret_key=None, use_cache=True):
             return open(valid, "rb+")
 
     try:
-        (bucket, key) = parse_s3_uri(uri, create_key=None)
+        (bucket, key) = parse_s3_uri(uri, create_key=False)
     except (PinholeKeyNotFound, PinholeBucketNotFound):
         raise PinholeFileNotFound(uri)
 
@@ -169,6 +169,9 @@ def is_valid(uri, access_key=None, secret_key=None):
 
     parsed = urlparse(uri)
     s3conn = S3Adapter()
+    if not parsed.hostname:
+        return False
+
     bucket = s3conn.get_bucket(parsed.hostname)
     if not bucket:
         return False
