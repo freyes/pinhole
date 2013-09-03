@@ -13,3 +13,5 @@ xunit.xml
 .downloadcache
 access.log
 tests/pinhole.db
+build/
+pinhole-cache/
