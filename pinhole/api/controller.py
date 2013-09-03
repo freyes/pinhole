@@ -3,7 +3,7 @@ import re
 import operator
 import logging
 from datetime import datetime
-from sqlalchemy.sql.expression import and_, or_
+from sqlalchemy.sql.expression import and_, or_, desc
 from flask import request, send_file
 from flask.ext import restful
 from flask.ext.restful import abort, marshal_with, fields, marshal
@@ -93,7 +93,6 @@ class PhotoList(restful.Resource):
 
         photos = photos.filter(filters)
         if args["order_by"].lstrip("-") in photo_fields:
-            from sqlalchemy.sql.expression import desc
             if args["order_by"].startswith("-"):
                 photos = photos.order_by(desc(args["order_by"].lstrip("-")))
             else:

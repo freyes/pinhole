@@ -251,6 +251,44 @@ class TestPhotoGetWithFilters(object):
             elif isinstance(a[key], dict):
                 self.compare_photo(a[key], b[key])
 
+    def test_get_order_by_id_asc(self):
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/photos?order_by=id")
+
+        assert_is_instance(res.json, dict)
+        assert_in("photos", res.json)
+        assert_equal(res.json["photos"], sorted(res.json["photos"],
+                                                key=lambda x: x["id"]))
+
+    def test_get_order_by_id_desc(self):
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/photos?order_by=-id")
+
+        assert_is_instance(res.json, dict)
+        assert_in("photos", res.json)
+        assert_equal(res.json["photos"], sorted(res.json["photos"],
+                                                key=lambda x: x["id"],
+                                                reverse=True))
+
+    def test_get_order_by_id_desc_and_limit(self):
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/photos?order_by=-id&limit=2")
+
+        assert_is_instance(res.json, dict)
+        assert_in("photos", res.json)
+        assert_equal(len(res.json["photos"]), 2)
+        assert_equal(res.json["photos"], sorted(res.json["photos"],
+                                                key=lambda x: x["id"],
+                                                reverse=True))
+
+    def test_get_with_limit(self):
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/photos?limit=2")
+
+        assert_is_instance(res.json, dict)
+        assert_in("photos", res.json)
+        assert_equal(len(res.json["photos"]), 2)
+
 
 class TestUploadedPhotos(BaseTest):
     def setUp(self):
