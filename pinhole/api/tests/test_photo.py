@@ -74,6 +74,20 @@ class TestPhotoController(BaseTest):
         assert_equal(o["id"], self.photo_id)
         assert_equal(o["title"], "Landscape")
 
+    def test_put(self):
+        self.login("john", "doe")
+        res = self.app.get("/api/v1/photos/%d" % self.photo_id)
+
+        assert_is_instance(res.json, dict)
+        assert_in("photo", res.json)
+        o = res.json
+        o["photo"]["title"] = "new landscape"
+
+        res = self.app.put_json("/api/v1/photos/%d" % self.photo_id, params=o)
+        assert_is_instance(res.json, dict)
+        assert_in("photo", res.json)
+        assert_equal(res.json["photo"]["title"], "new landscape")
+
     def test_get_by_size(self):
         self.login("john", "doe")
         url = "/api/v1/photos/file/%d/thumbnail/4843655940_d8dd79d602_o.jpg" \

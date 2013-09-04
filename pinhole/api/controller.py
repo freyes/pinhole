@@ -39,6 +39,26 @@ class Photo(restful.Resource):
         return abort(404, message="Photo {} doesn't exist".format(photo_id))
 
     @login_required
+    @marshal_with(foto_fields)
+    def put(self, photo_id):
+        photos = models.Photo.query.filter_by(id=photo_id,
+                                              user_id=current_user.id)
+        if photos.count() != 1:
+            return abort(404,
+                         message="Photo {} doesn't exist".format(photo_id))
+
+        photo = photos.first()
+
+        # TODO: sanitize the put
+        for k, v in request.json["photo"].iteritems():
+            if hasattr(photo, k):
+                setattr(photo, k, v)
+
+        db.session.add(photo)
+        db.session.commit()
+        return {"photo": photos.first()}
+
+    @login_required
     def delete(self, photo_id):
         photos = models.Photo.query.filter_by(id=photo_id,
                                               user_id=current_user.id)
