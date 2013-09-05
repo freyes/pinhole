@@ -157,3 +157,71 @@ App.UserWidgetView = Ember.View.extend({
         return c.get("isSignedIn");
     }.property("controllers.currentUser")
 });
+
+
+// App.PhotosViewView = Ember.View.extend({
+// });
+
+App.EditTextView = Ember.TextField.extend({
+    didInsertElement: function () {
+        this.$().focus();
+    },
+    focusOut: function() {
+        this.get("controller").send("acceptChanges");
+    },
+    insertNewline: function() {
+        this.get("controller").send("acceptChanges");
+    },
+    cancel: function() {
+        this.get("controller").send("cancelChanges");
+    }
+});
+
+Ember.Handlebars.helper('edit-text', App.EditTextView);
+
+App.EditTagView = Ember.TextField.extend({
+    classNames: ['edit'],
+    valueBinding: 'tag.name',
+    change: function () {
+        var value = this.get('value');
+        if (Ember.isEmpty(value)) {
+            this.get('controller').removeTodo();
+        }
+    },
+    focusOut: function () {
+        this.set('controller.isEditing', false);
+    },
+    insertNewline: function () {
+        this.set('controller.isEditing', false);
+    },
+    didInsertElement: function () {
+        this.$().focus();
+    }
+});
+
+
+App.NewTagView = Ember.TextField.extend({
+    photo: null,
+    didInsertElement: function () {
+        this.$().focus();
+    },
+    acceptChanges: function() {
+        var name = this.get("value");
+        if (!name)
+            return;
+
+        this.get('controller').send('newTag', name);
+        this.set("value");
+    },
+    focusOut: function() {
+        this.acceptChanges();
+    },
+    insertNewline: function() {
+        this.acceptChanges();
+    },
+    cancel: function() {
+        this.set("value", "");
+    }
+});
+
+Ember.Handlebars.helper('new-tag', App.NewTagView);

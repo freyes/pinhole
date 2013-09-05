@@ -1,3 +1,12 @@
+DS.RESTAdapter.registerTransform('datetime', {
+  serialize: function(value) {
+    return value.utc().format("YYYY-MM-DDThh:mm:ssZ");
+  },
+  deserialize: function(value) {
+    return moment(value, "YYYY-MM-DDThh:mm:ssZ");
+  }
+});
+
 App.UploadedPhoto = DS.Model.extend({
     url: DS.attr('string'),
     filename: DS.attr('string'),
@@ -17,6 +26,11 @@ App.User = DS.Model.extend({
     }.property()
 });
 
+App.Tag = DS.Model.extend({
+    name: DS.attr("string"),
+    photos: DS.hasMany('App.Photo')
+});
+
 App.Photo = DS.Model.extend({
     title: DS.attr("string"),
     description: DS.attr("string"),
@@ -24,13 +38,13 @@ App.Photo = DS.Model.extend({
     //roll: DS.attr(),
     public: DS.attr("boolean"),
     rating: DS.attr("number"),
-    //tags: DS.attr("string"),
+    tags: DS.hasMany("App.Tag"),
     height: DS.attr("number"),
     width: DS.attr("number"),
     make: DS.attr("string"),
     model: DS.attr("string"),
     software: DS.attr("string"),
-    dateTime: DS.attr("string"),
+    dateTime: DS.attr("datetime"),
     dateTimeDigitized: DS.attr("string"),
     dateTimeOriginal: DS.attr("string"),
     // calculated properties

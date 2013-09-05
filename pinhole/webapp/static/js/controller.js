@@ -92,7 +92,42 @@ Ember.Application.initializer({
 
 App.PhotosIndexController = Ember.ArrayController.extend({
     sortAscending: false,
-    sortProperties: ['id']
+    sortProperties: ['id'],
+    actions: {
+        edit: function() {
+            console.log("meh");
+        }
+    }
+});
+
+App.PhotosViewController = Ember.ObjectController.extend({
+    isEditing: false,
+    edit: function() {
+        this.set("isEditing", true);
+    },
+    acceptChanges: function() {
+        this.set("isEditing", false);
+        if(this.get('model').get('isSaving')) return;
+        this.get("model").save();
+    },
+    cancelChanges: function() {
+        this.set("isEditing", false);
+        this.get("model").reload();
+    },
+    newTag: function(name) {
+        var model = this.get("model");
+        $.ajax("/api/v1/photos/" + model.id + "/tags",
+               {
+                   type: "POST",
+                   data: {name: name},
+                   success:  function(data, textStatus, jqXHR) {
+                       model.reload();
+                   },
+                   error: function(jqXHR, textStatus, errorThrown) {
+                       console.log(jqXHR.responseText);
+                   }
+               });
+    }
 });
 
 App.RegisterAccountController = Ember.ObjectController.extend({

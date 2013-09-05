@@ -92,22 +92,34 @@
       <div id="wrapper">
         <div class="my-sidebar">
           <a class="btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-	    <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
           <!-- <div id="logo"> <a href="/"><img src="img/logo.svg" alt="logo" /></a> </div> -->
-	  <nav id="nav" class="navigation" role="navigation">
-	    <ul class="unstyled">
+          <nav id="nav" class="navigation" role="navigation">
+            <ul class="unstyled">
                 {{#linkTo "photos.index" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-home"></i><span>All</span></a>{{/linkTo}}
                 {{#linkTo "photos.upload" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-upload"></i><span>Upload</span></a>{{/linkTo}}
                 {{#linkTo "photos.share" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-share"></i><span>Share</span></a>{{/linkTo}}
                 {{#linkTo "logout" tagName="li" href=false}}<a {{bindAttr href="view.href"}}><i class="icon-off"></i><span>Logout</span></a>{{/linkTo}}
-	    </ul>
-	  </nav><!-- /nav -->
+            </ul>
+          </nav><!-- /nav -->
         </div><!-- /my-sidebar -->
 
       <div id="container">
+              <div class="btn-group">
+                  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Tags <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    {{#each tag in tags }}
+                      <li><a tabindex="-1" href="#">{{tag.name}}</a></li>
+                    {{/each}}
+                    <li><a tabindex="-1" href="#">Another action</a></li>
+                    <li><a tabindex="-1" href="#">Something else here</a></li>
+                    <li class="divider"></li>
+                    <li><a tabindex="-1" href="#">Separated link</a></li>
+                  </ul>
+              </div>
         <div class="span9">
           {{outlet}}
         </div>
@@ -137,7 +149,19 @@
         </div>
       </div>
       <div class="row">
-        <p class="span12">{{model.title}}</p>
+        <p {{bindAttr class="isEditing:editing"}}>
+          {{#if isEditing}}
+            {{edit-text class="edit" value=title}}
+          {{else}}
+            <label {{action "edit" on="doubleClick"}}>{{model.title}}</label>
+          {{/if}}
+        </p>
+        <div class="span12">
+          {{#each tag in tags }}
+              <span>{{tag.name}} <i class="icon-remove-sign"></i></span>
+          {{/each}}
+          New Tag: {{new-tag class="edit" photo=model focus-out="acceptChanges" insert-newline="acceptChanges"}}
+        </div>
         <p class="span12">{{model.description}}</p>
         <h3>Properties</h3>
         <p class="span12">
@@ -153,7 +177,7 @@
               </tr>
               <tr>
                 <td>Datetime</td>
-                <td>{{model.date_time}}</td>
+                <td>{{model.dateTime}}</td>
               </tr>
             </tbody>
           </table>
@@ -322,7 +346,7 @@
   <script type="text/javascript" src="js/vendor/moment.js"></script>
   <script type="text/javascript" src="js/vendor/jquery-1.9.1.min.js"></script>
   <script type="text/javascript" src="js/vendor/jquery.validate.js"></script>
-  <script type="text/javascript" src="/media/js/vendor/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/media/js/vendor/bootstrap.js"></script>
   <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
   <script type="text/javascript" src="js/vendor/handlebars-1.0.0-rc.4.js"></script>
   <script type="text/javascript" src="js/vendor/ember-1.0.0-rc.6.js"></script>
