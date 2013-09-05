@@ -56,6 +56,9 @@ class DateTime(types.TypeDecorator):
             return value
 
         if dialect.name == "sqlite":
-            return datetime.strptime(value, self.FORMAT)
+            try:
+                return datetime.strptime(value, self.FORMAT)
+            except:
+                return datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
         else:
             return value
