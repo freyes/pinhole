@@ -6,6 +6,7 @@ from datetime import datetime
 from urlparse import urlparse
 from os import path
 from PIL import Image, ExifTags
+from sqlalchemy.orm import validates
 from boto.s3.key import Key
 from pinhole.exception import PinholeFileNotFound
 from .auth import check_password, make_password
@@ -239,6 +240,24 @@ class Photo(db.Model, BaseModel):
     def fname(self):
         parsed = urlparse(self.s3_path)
         return path.basename(parsed.path)
+
+    @property
+    def tag_ids(self):
+        l = []
+        for t in self.tags:
+            l.append(t.id)
+
+        return l
+
+    @validates("date_time")
+    def validate_dt(self, key, dt):
+        if isinstance(dt, basestring):
+            try:
+                return datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
+            except Exception as ex:
+                print ex
+
+        return dt
 
     def add_tag(self, name):
         assert self.user is not None

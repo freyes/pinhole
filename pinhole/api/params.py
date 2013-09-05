@@ -28,6 +28,9 @@ tag_fields = {
     "name": fields.String,
 }
 
+tags = {"tags": fields.List(fields.Nested(tag_fields))}
+tag = {"tag": fields.Nested(tag_fields)}
+
 roll_fields = {
     'id': fields.Integer,
     "timestamp": DateTime,
@@ -56,6 +59,7 @@ photo_fields = {
     "public": fields.Boolean,
     'rating': fields.Raw,
     "tags": fields.List(fields.Nested(tag_fields)),
+    "tag_ids": fields.List(fields.Integer),
     "height": fields.Raw,
     "width": fields.Raw,
     "make": fields.Raw,

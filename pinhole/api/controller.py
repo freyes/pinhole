@@ -124,6 +124,30 @@ class PhotoList(restful.Resource):
         return {"photos": photos.all()}
 
 
+class Tag(restful.Resource):
+    pass
+
+
+class TagList(restful.Resource):
+    @login_required
+    @marshal_with(params.tags)
+    def get(self):
+        return {"tags": models.Tag.query.filter_by(user_id=current_user.id)}
+
+
+class PhotoTag(restful.Resource):
+    @login_required
+    @marshal_with(params.tags)
+    def post(self, photo_id):
+        tag_name = request.values["name"]
+
+        photo = models.Photo.get_by(id=photo_id, user_id=current_user.id)
+        photo.add_tag(tag_name)
+
+        return {"tags": models.Tag.query.filter_by(user_id=current_user.id,
+                                                   name=tag_name).all()}
+
+
 class UploadedPhotos(restful.Resource):
     @login_required
     @marshal_with(uploaded_photos_fields)
@@ -271,6 +295,9 @@ class Authenticated(restful.Resource):
 
 endpoints = [(Photo, '/photos/<int:photo_id>'),
              (PhotoList, "/photos"),
+             (Tag, "/tags/<int:tag_id>"),
+             (TagList, "/tags"),
+             (PhotoTag, "/photos/<int:photo_id>/tags"),
              (UploadedPhotos, "/uploaded_photos"),
              (PhotoFile,
               '/photos/file/<int:photo_id>/<string:size>/<string:fname>'),
