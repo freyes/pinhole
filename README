@@ -8,6 +8,7 @@ This program has the following components:
 * pinhole.api: web api for photo management
 * pinhole.common: general helper code shared across all the pinhole codebase
 * pinhole.webapp: this is where the UI related code lives
+* pinhole.tasks: Celery tasks for background processing
 
 Dependencies
 ------------
@@ -16,5 +17,6 @@ Dependencies
 * flask-sqlalchemy
 * flask-restful
 * flask-login
+* Celery
 * Sphinx
 * sphinxcontrib-httpdomain
